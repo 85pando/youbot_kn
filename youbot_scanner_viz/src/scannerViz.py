@@ -9,9 +9,11 @@ from sensor_msgs.msg import LaserScan
 from math import pi, sin, cos
 
 ### BEGIN MAGIC NUMBERS
-NROFDIRS     = 9
-NROFDIGITS   = 3 # if this is changed, printMainDirections has to be changed as well!
-SCANNERANGLE = 180
+NROFDIRS      = 9
+# if this is changed, printMainDirections has to be changed as well!
+NROFDIGITS    = 3
+SCANNERANGLE  = 180
+NROFDATAPOINTS = 640
 ### END MAGIC NUMBERS
 
 
@@ -40,13 +42,13 @@ def printMainDirections(seqNr, nrOfDirs, ranges):
   for rangei in ranges:
     rangeString += " %1.3f |" % rangei
   # prettyPrint - Print the Strings
-  print("Sequence: %10u" % seqNr)
+  print("Sequence Number: %10u" % seqNr)
   print(lineString)
   print(angleString)
   print(lineString)
   print(rangeString)
   print(lineString)
-  print("\n\n")
+  print("\n")
 
 """
 Convert the raw data from the laserScan to an array of distances.
@@ -57,24 +59,17 @@ def laserCalc(data):
     laser.append(range)
   return laser
 
-# the following example code on how to convert LaserScan Data is from
-# http://nullege.com/codes/show/src@f@r@FroboMind-HEAD@fmApp@sdu@sdu_surveying_2014@survey@survey_log_node.py/40/sensor_msgs.msg.LaserScan
-def laserCalc2(data):
-  laser = []
-  theta = data.angle_min
-  for i in xrange(len(data.ranges)):
-    r = data.ranges[i]
-    laser.append([r*sin(theta), r*cos(theta)]) #polar to cartesian
-    theta += data.angle_increment
-  return laser
-
 """
 Take only "main" directions from the whole 640 data points.
 """
 def snipDirections(ranges):
   mainRanges = []
   for i in range(NROFDIRS):
-    mainRanges.append(round(ranges[i*640/NROFDIRS],NROFDIGITS))
+    if (i != 0):
+      mainRanges.append(round(ranges[(i*NROFDATAPOINTS/(NROFDIRS-1))-1],NROFDIGITS))
+    else:
+      mainRanges.append(round(ranges[0], NROFDIGITS))
+  mainRanges[0] = round(ranges[0], NROFDIGITS)
   return (NROFDIRS, mainRanges)
 
 def init():

@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(youbot_scanner_viz_py)
+project(youbot_scanner_viz)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  roscpp
   std_msgs
 )
 
@@ -80,7 +81,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES youbot_scanner_viz_py
+#  LIBRARIES youbot_scanner_viz
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -103,6 +104,8 @@ include_directories(
 
 ## Declare a cpp executable
 # add_executable(youbot_scanner_viz_py_node src/youbot_scanner_viz_py_node.cpp)
+add_executable(scanner_viz src/scannerViz.cpp)
+target_link_libraries(scanner_viz ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
