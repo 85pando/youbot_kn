@@ -6,7 +6,6 @@ This script shows the distances of the primary directions of the LaserScanner.
 from os import system
 import rospy
 from sensor_msgs.msg import LaserScan
-from math import pi, sin, cos
 
 ### BEGIN MAGIC NUMBERS
 NROFDIRS      = 9
@@ -15,7 +14,6 @@ NROFDIGITS    = 3
 SCANNERANGLE  = 180
 NROFDATAPOINTS = 640
 ### END MAGIC NUMBERS
-
 
 # execute this every time data is received
 def laserCallback(data):
@@ -77,10 +75,10 @@ def init():
   rospy.init_node('scannerViz', anonymous=True)
   # Subscribe to Sensor data
   rospy.Subscriber("/youbot/scan_front", LaserScan, laserCallback)
-  # Don't close this until node is stopped
+  # Don't close this until node is stopped.
   rospy.spin()
 
 
-
+# python boilerplate
 if __name__ == '__main__':
   init()
