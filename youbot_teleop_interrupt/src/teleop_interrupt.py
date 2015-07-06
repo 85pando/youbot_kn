@@ -142,21 +142,17 @@ if __name__ == "__main__":
       key = getKey()
       if key in movementDirections.keys():
         # add movement stuff
-        #print("Movement"); status += 1
         x  = movementDirections[key][0]
         y  = movementDirections[key][1]
         th = movementDirections[key][2]
 
       elif key in speedModifier.keys():
         # add speed stuff
-        #print("Speed"); status += 1
         speed = speed * speedModifier[key][0]
         turn  = turn  * speedModifier[key][1]
         print(vels(speed,turn)); status += 1
 
       else:
-        #if (key != '-'):
-          #print("Stop"); status += 1
         x = 0
         y = 0
         th = 0
