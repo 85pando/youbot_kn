@@ -37,9 +37,10 @@ Alternative, set NUM-Block to numbers
 4 5 6     ← ⎊ →
 1 2 3     ↙ ↓ ↘
 
-r/t - increase/deacrease all      speeds by 10%
-f/g - increase/deacrease moving   speed  by 10%
-v/b - increase/deacrease rotation speed  by 10%
+r/t   - increase/deacrease all      speeds by 10%
+f/g   - increase/deacrease moving   speed  by 10%
+v/b   - increase/deacrease rotation speed  by 10%
+space - reset speeds
 
 anything else: stop
 
@@ -150,6 +151,11 @@ if __name__ == "__main__":
         # add speed stuff
         speed = speed * speedModifier[key][0]
         turn  = turn  * speedModifier[key][1]
+        print(vels(speed,turn)); status += 1
+      elif key == " ":
+        # reset speed values
+        speed = 0.1
+        turn  = 0.1
         print(vels(speed,turn)); status += 1
 
       else:
