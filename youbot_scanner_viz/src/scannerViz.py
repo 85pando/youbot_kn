@@ -22,10 +22,8 @@ def laserCallback(data):
   laser = snipDirections(laser)
   printMainDirections(seqNr, laser[0], laser[1])
 
-"""
-Print directions in a nice way.
-"""
 def printMainDirections(seqNr, nrOfDirs, ranges):
+  """Print directions in a nice way."""
   angles = []
   for dir in range(nrOfDirs):
     angles.append(dir * SCANNERANGLE / (nrOfDirs-1))
@@ -48,19 +46,15 @@ def printMainDirections(seqNr, nrOfDirs, ranges):
   print(lineString)
   print("\n")
 
-"""
-Convert the raw data from the laserScan to an array of distances.
-"""
 def laserCalc(data):
+  """Convert the raw data from the laserScan to an array of distances."""
   laser = []
   for range in data.ranges:
     laser.append(range)
   return laser
 
-"""
-Take only "main" directions from the whole 640 data points.
-"""
 def snipDirections(ranges):
+  """Take only "main" directions from the whole 640 data points."""
   mainRanges = []
   for i in range(NROFDIRS):
     if (i != 0):

@@ -25,8 +25,8 @@ NROFDATAPOINTS = 640
 laserData = LaserScan()
 ### END GLOBAL VARIABLES
 
-"""A movement command is received, process it!"""
 def receiveCmd(cmdData):
+  """A movement command is received, process it!"""
   # want to access the global variable
   global laserData
   # TODO check laserScan for objects
@@ -35,13 +35,13 @@ def receiveCmd(cmdData):
     print("No safe movement possible, distance is %1.4f.\n" %laserData.ranges[319])
     return None
   else:
-    print("publishing")
-    print(cmdData)
+    #print("publishing")
+    #print(cmdData)
     pub.publish(cmdData)
     return None
 
-"""The LaserScanner has send a new scan. Make it processable."""
 def receiveLaser(laser):
+  """The LaserScanner has send a new scan. Make it processable."""
   # want to write into global variable
   global laserData
   laserData = laser
