@@ -6,8 +6,8 @@ This script will move the base in a safe way, stopping before it hits anythin on
 
 # This code is created by Stephan Heidinger (stephan.heidinger@uni-konstanz.de) and published under Creative Commons Attribution license.
 
-from os import system
-
+from os   import system
+from math import sin, pi
 import sys
 
 import rospy
@@ -16,32 +16,67 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 
 ### BEGIN MAGIC NUMBERS
-NROFDIRS      = 9
-SCANNERANGLE  = 180
-NROFDATAPOINTS = 640
+NROFDIRS              = 9
+SCANNERANGLE          = 180
+NROFDATAPOINTS        = 640
+NROFMEASUREMENTPOINTS = 5
+SAFEBOXRIGHTCORNER    = NROFDATAPOINTS/4-1
+SAFEBOXLEFTCORNER     = NROFDATAPOINTS/4*3-1
+SAFEBOXRIGHTANGLE     = pi/4
+SAFEBOXLEFTANGLE      = pi/4*3
 ### END MAGIC NUMBERS
 
 ### BEGIN GLOBAL VARIABLES
 laserData = LaserScan()
-distanceLeft  = 0.184
-distanceRight = 0.184
-distanceFront = 0.230
+distanceLeft  = 0.190 # wheel end is 158
+distanceRight = 0.190 # wheel end is 158
+distanceFront = 0.230 #
 ### END GLOBAL VARIABLES
 
 def receiveCmd(cmdData):
   """A movement command is received, process it!"""
-  # want to access the global variable
-  global laserData
   # TODO check laserScan for objects
-  # TODO if no object in movement direction, publish
-  if laserData.ranges[NROFDATAPOINTS/2-1] <= 0.4:
-    print("No safe movement possible, distance is %1.4f.\n" %laserData.ranges[319])
-    return None
+
+  # TODO movement directions
+  if cmdData.linear.x > 0:
+    # forward
+    if cmdData.linear.y > 0:
+      print("forward left")
+    elif cmdData.linear.y < 0:
+      print("forward right")
+    else:
+      #print("forward only")
+      if laserData.ranges[319] <= distanceFront + cmdData.linear.x:
+        printInterrupt()
+        return None
+  elif cmdData.linear.x < 0:
+    # backwards: there is no sensor here, so we don't care
+    pass
   else:
-    #print("publishing")
-    #print(cmdData)
-    pub.publish(cmdData)
-    return None
+    # no x-movement
+    if cmdData.linear.y > 0:
+      #print("left only")
+      if laserData.ranges[NROFDATAPOINTS-1] <= distanceLeft + cmdData.linear.y:
+        printInterrupt()
+        return None
+    elif cmdData.linear.y < 0:
+      #print("right only")
+      if laserData.ranges[0] <= distanceRight - cmdData.linear.y:
+        printInterrupt()
+        return None
+    else:
+      # no movement, so we don't care
+      pass
+
+  # TODO something with turning
+
+  # if no object in movement direction, publish
+  pub.publish(cmdData)
+  return None
+
+def printInterrupt():
+  """Print an interrupt message."""
+  print("Movement interrupted: %u s" % laserData.header.stamp.secs)
 
 def receiveLaser(laser):
   """The LaserScanner has send a new scan. Make it processable."""
@@ -57,11 +92,11 @@ def receiveLaser(laser):
 
 def calibrate():
   """Calibrate the position of the laser-Scanner on the youbot. It is possible to just enter the values for the safe box or measure them using the laser and some calibration object (e.g. a piece of paper)."""
-  global laserData
   global distanceLeft
   global distanceRight
   global distanceFront
   if query_yes_no("Do you know the values for the safe box?", default="no"):
+    print("Default values:\n\tleft border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
     # directly enter safe box values
     valuesOk = False
     while not valuesOk:
