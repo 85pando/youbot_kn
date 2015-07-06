@@ -38,7 +38,7 @@ distanceFront = 0.230 #
 
 def receiveCmd(cmdData):
   """A movement command is received, process it!"""
-  # TODO check laserScan for objects
+  # check laserScan for objects
 
   # TODO movement directions
   if cmdData.linear.x > 0:
@@ -120,7 +120,7 @@ def calibrate():
       print("left border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
       valuesOk = query_yes_no("Are these values correct?", default="yes")
   else:
-    # TODO enter values using the laser scanner itsself
+    # enter values using the laser scanner itsself
     valuesOk = False
     while not valuesOk:
       # left border
@@ -194,7 +194,7 @@ if __name__ == "__main__":
   # want to send movement message to actual control
   pub = rospy.Publisher('/youbot/cmd_vel', Twist, queue_size=1)
   # want to receive movement commands from other nodes
-  rospy.Subscriber('cmd_vel_safe', Twist, receiveCmd)
+  rospy.Subscriber('/youbot/cmd_vel_safe', Twist, receiveCmd)
   # want to receive messages from the laser scanner
   rospy.Subscriber('/youbot/scan_front', LaserScan, receiveLaser)
   # initialize node

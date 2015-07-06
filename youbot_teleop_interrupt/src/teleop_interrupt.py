@@ -120,7 +120,7 @@ if __name__ == "__main__":
   settings = termios.tcgetattr(sys.stdin)
 
   # queue_size=1 => only the latest command will be kept
-  pub = rospy.Publisher('cmd_vel_safe', Twist, queue_size=1)
+  pub = rospy.Publisher('/youbot/cmd_vel_safe', Twist, queue_size=1)
   rospy.init_node('teleop_interrupt')
 
   # movement and rotation direction values
