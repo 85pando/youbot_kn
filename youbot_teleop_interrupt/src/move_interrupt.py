@@ -39,26 +39,17 @@ distanceFront = 0.230 #
 def receiveCmd(cmdData):
   """A movement command is received, process it!"""
   # check laserScan for objects
-
-  # TODO movement directions
   if cmdData.linear.x > 0:
     # forward
     if cmdData.linear.y > 0:
+      # TODO forward left
       print("forward left")
     elif cmdData.linear.y < 0:
+      # TODO forward right
       print("forward right")
     else:
-      for i in range(NROFMEASUREMENTPOINTS):
-        # the angle of the current laser-beam
-        iAngle          = SAFEBOXRIGHTANGLE + i * MEASUREMENTANGLEINC
-        # how far is the object, measured from the line perpendicular to the movement direction
-        forwardSpace    = laserData.ranges[SAFEBOXRIGHTCORNER+i*MEASUREMENTINCREMENT] * sin(iAngle)
-        # how much do we want to move
-        forwardMovement = distanceFront + cmdData.linear.x
-        # can we do this?
-        if forwardSpace <= forwardMovement:
-          printInterrupt()
-          return None
+      if not safeBox(cmdData):
+        return None
   else:
     # no x-movement
     if cmdData.linear.y > 0:
@@ -80,6 +71,21 @@ def receiveCmd(cmdData):
   # if no object in movement direction, publish
   pub.publish(cmdData)
   return None
+
+def safeBox(cmdData):
+  for i in range(NROFMEASUREMENTPOINTS):
+    # the angle of the current laser-beam
+    iAngle          = SAFEBOXRIGHTANGLE + i * MEASUREMENTANGLEINC
+    # how far is the object, measured from the line perpendicular to the movement direction
+    forwardSpace    = laserData.ranges[SAFEBOXRIGHTCORNER+i*MEASUREMENTINCREMENT] * sin(iAngle)
+    # how much do we want to move
+    forwardMovement = distanceFront + cmdData.linear.x
+    # can we do this?
+    if forwardSpace <= forwardMovement:
+      printInterrupt()
+      return False
+  # We have found nothing in the Safe Box
+  return True
 
 def printInterrupt():
   """Print an interrupt message."""
