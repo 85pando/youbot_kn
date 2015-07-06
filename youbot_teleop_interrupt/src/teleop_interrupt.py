@@ -190,6 +190,7 @@ if __name__ == "__main__":
 
   finally:
     # send command velocities to 0 (stop the robot)
+    print("Stopping the robot")
     twist = Twist()
     twist.linear.x = 0
     twist.linear.y = 0
@@ -198,3 +199,4 @@ if __name__ == "__main__":
     twist.angular.y = 0
     twist.angular.z = 0
     pub.publish(twist)
+    print("Shutting down.")
