@@ -16,14 +16,17 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 
 ### BEGIN MAGIC NUMBERS
-NROFDIRS              = 9
 SCANNERANGLE          = 180
 NROFDATAPOINTS        = 640
-NROFMEASUREMENTPOINTS = 5
 SAFEBOXRIGHTCORNER    = NROFDATAPOINTS/4-1
 SAFEBOXLEFTCORNER     = NROFDATAPOINTS/4*3-1
+SAFEBOXFRONTRANGE     = SAFEBOXLEFTCORNER - SAFEBOXRIGHTCORNER
 SAFEBOXRIGHTANGLE     = pi/4
 SAFEBOXLEFTANGLE      = pi/4*3
+SAFEBOXANGLERANGE     = SAFEBOXLEFTANGLE - SAFEBOXRIGHTANGLE
+NROFMEASUREMENTPOINTS = 5
+MEASUREMENTINCREMENT  = SAFEBOXFRONTRANGE / (NROFMEASUREMENTPOINTS-1)
+MEASUREMENTANGLEINC   = SAFEBOXANGLERANGE / (NROFMEASUREMENTPOINTS-1)
 ### END MAGIC NUMBERS
 
 ### BEGIN GLOBAL VARIABLES
@@ -45,13 +48,17 @@ def receiveCmd(cmdData):
     elif cmdData.linear.y < 0:
       print("forward right")
     else:
-      #print("forward only")
-      if laserData.ranges[319] <= distanceFront + cmdData.linear.x:
-        printInterrupt()
-        return None
-  elif cmdData.linear.x < 0:
-    # backwards: there is no sensor here, so we don't care
-    pass
+      for i in range(NROFMEASUREMENTPOINTS):
+        # the angle of the current laser-beam
+        iAngle          = SAFEBOXRIGHTANGLE + i * MEASUREMENTANGLEINC
+        # how far is the object, measured from the line perpendicular to the movement direction
+        forwardSpace    = laserData.ranges[SAFEBOXRIGHTCORNER+i*MEASUREMENTINCREMENT] * sin(iAngle)
+        # how much do we want to move
+        forwardMovement = distanceFront + cmdData.linear.x
+        # can we do this?
+        if forwardSpace <= forwardMovement:
+          printInterrupt()
+          return None
   else:
     # no x-movement
     if cmdData.linear.y > 0:
