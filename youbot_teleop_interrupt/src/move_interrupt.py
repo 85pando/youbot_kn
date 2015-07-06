@@ -62,12 +62,12 @@ def receiveCmd(cmdData):
   else:
     # no x-movement
     if cmdData.linear.y > 0:
-      #print("left only")
+      # left only movement, can not really see much here
       if laserData.ranges[NROFDATAPOINTS-1] <= distanceLeft + cmdData.linear.y:
         printInterrupt()
         return None
     elif cmdData.linear.y < 0:
-      #print("right only")
+      # right only movement, can not really see much here
       if laserData.ranges[0] <= distanceRight - cmdData.linear.y:
         printInterrupt()
         return None
