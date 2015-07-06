@@ -59,23 +59,23 @@ movementDirections = {
 , 's': (-1, 0, 0) # backward
 , 'd': ( 0,-1, 0) # right
 # NUM-Block linear movement
-, '1': (-1,-1, 0) # backward, left
+, '1': (-1, 1, 0) # backward, left
 , '2': (-1, 0, 0) # backward
-, '3': (-1, 1, 0) # backward, right
-, '4': ( 0,-1, 0) # left
+, '3': (-1,-1, 0) # backward, right
+, '4': ( 0, 1, 0) # left
 , '5': ( 0, 0, 0) # stop
-, '6': ( 0, 1, 0) # right
-, '7': ( 1,-1, 0) # forward, left
+, '6': ( 0,-1, 0) # right
+, '7': ( 1, 1, 0) # forward, left
 , '8': ( 1, 0, 0) # forward
-, '9': ( 1, 1, 0) # forward, right
+, '9': ( 1,-1, 0) # forward, right
 # rotational movement
-, 'u': ( 0, 0, 1) # clockwise
-, 'i': ( 0, 0,-1) # counter-clockwise
+, 'u': ( 0, 0, 1) # counter-clockwise
+, 'i': ( 0, 0,-1) # clockwise
 # circular movement (linear + rotation)
-, 'h': ( 1, 0,-1) # ccw + forward
-, 'j': ( 1, 0, 1) # cw  + forward
-, 'n': (-1, 0,-1) # ccw + backward
-, 'm': (-1, 0, 1) # cw  + backward
+, 'h': ( 1, 0, 1) # ccw + forward
+, 'j': ( 1, 0,-1) # cw  + forward
+, 'n': (-1, 0, 1) # ccw + backward
+, 'm': (-1, 0,-1) # cw  + backward
 }
 
 #speed modification bindings
