@@ -7,7 +7,7 @@ This script will move the base in a safe way, stopping before it hits anythin on
 # This code is created by Stephan Heidinger (stephan.heidinger@uni-konstanz.de) and published under Creative Commons Attribution license.
 
 from os   import system
-from math import sin, pi
+from math import sin, atan2, pi
 import sys
 
 import rospy
@@ -16,24 +16,14 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 
 ### BEGIN MAGIC NUMBERS
-
 NROFDATAPOINTS        = 640
-SAFEBOXRIGHTCORNER    = NROFDATAPOINTS/4-1
-SAFEBOXLEFTCORNER     = NROFDATAPOINTS/4*3-1
-SAFEBOXFRONTRANGE     = SAFEBOXLEFTCORNER - SAFEBOXRIGHTCORNER
-SAFEBOXRIGHTANGLE     = pi/4
-SAFEBOXLEFTANGLE      = pi/4*3
-SAFEBOXANGLERANGE     = SAFEBOXLEFTANGLE - SAFEBOXRIGHTANGLE
-NROFMEASUREMENTPOINTS = SAFEBOXFRONTRANGE / 2
-MEASUREMENTINCREMENT  = SAFEBOXFRONTRANGE / (NROFMEASUREMENTPOINTS-1)
-MEASUREMENTANGLEINC   = SAFEBOXANGLERANGE / (NROFMEASUREMENTPOINTS-1)
 ### END MAGIC NUMBERS
 
 ### BEGIN GLOBAL VARIABLES
-laserData = LaserScan()
-distanceLeft  = 0.190 # wheel end is 158
-distanceRight = 0.190 # wheel end is 158
-distanceFront = 0.230 #
+laserData      = LaserScan()
+distanceLeft   = 0.190 # wheel end is 158
+distanceRight  = 0.190 # wheel end is 158
+distanceFront  = 0.230 #
 ### END GLOBAL VARIABLES
 
 def receiveCmd(cmdData):
@@ -73,11 +63,12 @@ def receiveCmd(cmdData):
   return None
 
 def safeBox(cmdData):
-  for i in range(NROFMEASUREMENTPOINTS):
+  """Calculates, if the safebox is indeed safe (i.e. nothing in there)."""
+  for i in range(int(numberOfMeasurementPoints)):
     # the angle of the current laser-beam
-    iAngle          = SAFEBOXRIGHTANGLE + i * MEASUREMENTANGLEINC
-    # how far is the object, measured from the line perpendicular to the movement direction
-    forwardSpace    = laserData.ranges[SAFEBOXRIGHTCORNER+i*MEASUREMENTINCREMENT] * sin(iAngle)
+    iAngle          = safeboxRightAngle + i * measurementAngleInc
+    # how far is the object, measured from the line perpendicular to the forward direction
+    forwardSpace    = laserData.ranges[int(safeboxRightCorner+i*measurementIncrement)] * sin(iAngle)
     # how much do we want to move
     forwardMovement = distanceFront + cmdData.linear.x
     # can we do this?
@@ -96,11 +87,6 @@ def receiveLaser(laser):
   # want to write into global variable
   global laserData
   laserData = laser
-  #laserData['seqNr'] = laser.header.seq
-  #laserData['time']  = laser.header.stamp.secs
-  #for i in range(len(laser.ranges)):
-    #laserData[i] = laser.ranges[i]
-  #print(laserData.ranges[319])
   return None
 
 def calibrate():
@@ -144,6 +130,42 @@ def calibrate():
       # Check if values are good
       print("left border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
       valuesOk = query_yes_no("Do these values seem correct?", default="yes")
+  calculateSafeBox()
+  return None
+
+def calculateSafeBox():
+  """Calculates new values for the safe box. This has to be used after calibration or distances have changed"""
+  global safeboxRightAngle
+  global safeboxLeftAngle
+  global safeboxRightCorner
+  global safeboxLeftCorner
+  global safeboxFrontRange
+  global safeboxAngleRange
+  global numberOfMeasurementPoints # how many rays will be used to check for objects
+  global measurementIncrement      # how many rays are in between two measurement points
+  global measurementAngleInc       # which angle is between two measurement points
+  # calculate angle for corner, both angles are calculated from the zero ray of the scanner
+  safeboxRightAngle =      atan2(distanceFront,distanceRight)
+  safeboxLeftAngle  = pi - atan2(distanceFront,distanceLeft)
+  # make sure we are in the right quadrant:
+  if not (safeboxRightAngle >= 0):
+    raise SafeBoxAngleException("Right Angle below zero: %1.3f" % safeboxRightAngle)
+  elif not (safeboxRightAngle <= pi/2):
+    raise SafeBoxAngleException("Right Angle above pi/2: %1.3f" % safeboxRightAngle)
+  if not (safeboxLeftAngle >= pi/2):
+    raise SafeBoxAngleException("Left Angle below pi/2: %1.3f" % safeboxLeftAngle)
+  elif not (safeboxLeftAngle <= pi):
+    raise SafeBoxAngleException("Left Angle above pi: %1.3f" % safeboxLeftAngle)
+  # calculate data point for corner
+  safeboxRightCorner = safeboxRightAngle / pi * (NROFDATAPOINTS-1)
+  safeboxLeftCorner  = safeboxLeftAngle  / pi * (NROFDATAPOINTS-1)
+  # calculate front stuff
+  safeboxFrontRange = safeboxLeftCorner - safeboxRightCorner
+  safeboxAngleRange = safeboxLeftAngle  - safeboxRightAngle
+  # calculate the rest
+  numberOfMeasurementPoints = safeboxFrontRange / 2
+  measurementIncrement      = safeboxFrontRange / (numberOfMeasurementPoints-1)
+  measurementAngleInc       = safeboxAngleRange / (numberOfMeasurementPoints-1)
 
 def readNumber():
   """Read in a number from stdin. Check if the string is a number and prompts until it is otherwise."""
@@ -195,6 +217,17 @@ def query_yes_no(question, default="yes"):
       sys.stdout.write("Please respond with 'yes' or 'no' "
                        "(or 'y' or 'n').\n")
 
+class Error(Exception):
+  """Base class for exceptions in this module."""
+  pass
+
+class SafeBoxAngleException(Error):
+  """This Exception shows, that one of the angles of the safebox is broken."""
+  def __init__(self, message):
+    self.message = message
+  def __str__(self):
+    return repr(self.message)
+
 # default python boilerplate
 if __name__ == "__main__":
   # want to send movement message to actual control
@@ -209,6 +242,10 @@ if __name__ == "__main__":
   if query_yes_no("Do you want to calibrate the laser-scanner?", default="no"):
     calibrate();
   else:
-    print("Laser-scanner will not be calibrated. Using default values:\n\tleft border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
+    try:
+      calculateSafeBox()
+    except SafeBoxAngleException as e:
+      print(e)
+    print("Using default values:\n\tleft border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
   # keep alive
   rospy.spin()
