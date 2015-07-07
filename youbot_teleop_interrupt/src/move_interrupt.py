@@ -17,6 +17,8 @@ from sensor_msgs.msg import LaserScan
 
 ### BEGIN MAGIC NUMBERS
 NROFDATAPOINTS        = 640
+ROBOTWIDTH            = 380
+ROBOTLENGTH           = 580
 ### END MAGIC NUMBERS
 
 ### BEGIN GLOBAL VARIABLES
@@ -155,6 +157,7 @@ def calibrate():
       print("Enter value for back border:")
       distanceBack = readNumber()
       # check if values are ok
+      printSizeWarning()
       print("left border: %1.3f, right border: %1.3f, front border: %1.3f, back border: %1.3f" % (distanceLeft, distanceRight, distanceFront, distanceBack))
       valuesOk = query_yes_no("Are these values correct?", default="yes")
   else:
@@ -185,10 +188,21 @@ def calibrate():
         distanceBack = laserData.ranges[0] - distanceRight
       # back border
       # Check if values are good
+      printSizeWarning()
       print("left border: %1.3f, right border: %1.3f, front border: %1.3f, back border: %1.3f" % (distanceLeft, distanceRight, distanceFront, distanceBack))
       valuesOk = query_yes_no("Do these values seem correct?", default="yes")
   calculateSafeBox()
   return None
+
+def printSizeWarning():
+  """Prints a warning when the lengths for the safeboxes are smaller than the actual robot."""
+  global distanceLeft
+  global distanceRight
+  global distanceBack
+  if (distanceLeft + distanceRight) < ROBOTWIDTH:
+    print("Warning: The width of your safeBox is smaller than the robot.")
+  if (distanceRight + distanceBack) < (ROBOTLENGTH + ROBOTWIDTH/2):
+    print("Warning: The length of your safeBox is smaller than the robot.")
 
 def calculateSafeBox():
   """Calculates new values for the safe box. This has to be used after calibration or distances have changed"""
