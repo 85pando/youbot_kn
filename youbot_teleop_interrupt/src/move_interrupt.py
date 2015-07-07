@@ -29,7 +29,7 @@ distanceBack   = 0.590 # length of the robot is 580
 
 def receiveCmd(cmdData):
   """A movement command is received, process it!"""
-  # check laserScan for objects
+  # check laserScan for objects (linear movement)
   if cmdData.linear.x > 0:
     # forward
     if cmdData.linear.y > 0:
@@ -72,7 +72,13 @@ def receiveCmd(cmdData):
       # no movement, so we don't care
       pass
 
-  # TODO something with turning
+  # check laserScan for objects (rotational movement)
+  if cmdData.angular.z != 0:
+    # check the safeBox
+    if not safeBox(cmdData):
+      print("checking")
+      printInterrupt()
+      return None
 
   # if no object in movement direction, publish
   pub.publish(cmdData)
