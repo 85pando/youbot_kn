@@ -34,7 +34,7 @@ def receiveCmd(cmdData):
     # forward
     if cmdData.linear.y > 0:
       # forward left
-      if not safeBoxDiagonal(cmdData, False):
+      if not safeBoxDiagonal(cmdData, NROFDATAPOINTS-1):
         # check for tail of robot
         printInterrupt()
         return None
@@ -44,7 +44,7 @@ def receiveCmd(cmdData):
         return None
     elif cmdData.linear.y < 0:
       # forward right
-      if not safeBoxDiagonal(cmdData, True):
+      if not safeBoxDiagonal(cmdData, 0):
         # check for tail of robot
         printInterrupt()
         return None
@@ -74,8 +74,8 @@ def receiveCmd(cmdData):
 
   # check laserScan for objects (rotational movement)
   if cmdData.angular.z != 0:
-    # check the safeBox
-    if not safeBox(cmdData):
+    # turning left
+    if not safeBox(0):
       print("checking")
       printInterrupt()
       return None
@@ -84,22 +84,18 @@ def receiveCmd(cmdData):
   pub.publish(cmdData)
   return None
 
-def safeBoxDiagonal(cmdData, right):
+def safeBoxDiagonal(cmdData, ray):
   """Calculates if the diagonal safeBox is indeed safe.
 
     cmdData -- the movement order
-    right   -- this boolean shows if movement is to the right, otherwise its to the left
+    ray     -- Which ray to use for calulating the diagonal safeBox. For right movement this should normally be 0 and for left movement NROFDATAPOINTS-1
   """
   x = cmdData.linear.x
   y = abs(cmdData.linear.y) # this is abs, because right movement is negative
   angle = atan2(x,y)
   distanceValue = tan(pi/2 - angle) * distanceBack + distanceRight
   movementDistance = sqrt(pow(x,2) + pow(y,2))
-  if right:
-    i = 0
-  else:
-    i = NROFDATAPOINTS-1
-  if laserData.ranges[i] < distanceValue + movementDistance:
+  if laserData.ranges[ray] < distanceValue + movementDistance:
     return False
   # diagonal safeBox seems safe
   return True
