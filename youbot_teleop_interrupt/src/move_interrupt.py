@@ -38,7 +38,7 @@ def receiveCmd(cmdData):
         # check for tail of robot
         printInterrupt()
         return None
-      elif not safeBox(cmdData):
+      elif not safeBox(cmdData.linear.x):
         # check safe box
         printInterrupt
         return None
@@ -48,13 +48,13 @@ def receiveCmd(cmdData):
         # check for tail of robot
         printInterrupt()
         return None
-      elif not safeBox(cmdData):
+      elif not safeBox(cmdData.linear.x):
         # check safeBox
         printInterrupt
         return None
     else:
       # pure forward movement
-      if not safeBox(cmdData):
+      if not safeBox(cmdData.linear.x):
         return None
   else:
     # no x-movement
@@ -100,15 +100,19 @@ def safeBoxDiagonal(cmdData, ray):
   # diagonal safeBox seems safe
   return True
 
-def safeBox(cmdData):
-  """Calculates, if the safebox is indeed safe (i.e. nothing in there)."""
+def safeBox(movementDistance):
+  """
+  Calculates, if the safebox is indeed safe (i.e. nothing in there).
+
+    movementDistance -- How far will the robot move? Use 0 for rotation.
+  """
   for i in range(int(numberOfMeasurementPoints)):
     # the angle of the current laser-beam
     iAngle          = safeboxRightAngle + i * measurementAngleInc
     # how far is the object, measured from the line perpendicular to the forward direction
     forwardSpace    = laserData.ranges[int(safeboxRightCorner+i*measurementIncrement)] * sin(iAngle)
     # how much do we want to move
-    forwardMovement = distanceFront + cmdData.linear.x
+    forwardMovement = distanceFront + movementDistance
     # can we do this?
     if forwardSpace <= forwardMovement:
       printInterrupt()
