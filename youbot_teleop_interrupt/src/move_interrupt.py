@@ -7,7 +7,7 @@ This script will move the base in a safe way, stopping before it hits anythin on
 # This code is created by Stephan Heidinger (stephan.heidinger@uni-konstanz.de) and published under Creative Commons Attribution license.
 
 from os   import system
-from math import sin, atan2, pi
+from math import sin, atan2, tan, pi, sqrt, pow
 import sys
 
 import rospy
@@ -21,9 +21,10 @@ NROFDATAPOINTS        = 640
 
 ### BEGIN GLOBAL VARIABLES
 laserData      = LaserScan()
-distanceLeft   = 0.190 # wheel end is 158
-distanceRight  = 0.190 # wheel end is 158
-distanceFront  = 0.230 #
+distanceLeft   = 0.200 # wheel end is 190
+distanceRight  = 0.200 # wheel end is 190
+distanceFront  = 0.100 #
+distanceBack   = 0.590 # length of the robot is 580
 ### END GLOBAL VARIABLES
 
 def receiveCmd(cmdData):
@@ -32,12 +33,27 @@ def receiveCmd(cmdData):
   if cmdData.linear.x > 0:
     # forward
     if cmdData.linear.y > 0:
-      # TODO forward left
-      print("forward left")
+      # forward left
+      if not safeBoxDiagonal(cmdData, False):
+        # check for tail of robot
+        printInterrupt()
+        return None
+      elif not safeBox(cmdData):
+        # check safe box
+        printInterrupt
+        return None
     elif cmdData.linear.y < 0:
-      # TODO forward right
-      print("forward right")
+      # forward right
+      if not safeBoxDiagonal(cmdData, True):
+        # check for tail of robot
+        printInterrupt()
+        return None
+      elif not safeBox(cmdData):
+        # check safeBox
+        printInterrupt
+        return None
     else:
+      # pure forward movement
       if not safeBox(cmdData):
         return None
   else:
@@ -61,6 +77,26 @@ def receiveCmd(cmdData):
   # if no object in movement direction, publish
   pub.publish(cmdData)
   return None
+
+def safeBoxDiagonal(cmdData, right):
+  """Calculates if the diagonal safeBox is indeed safe.
+
+    cmdData -- the movement order
+    right   -- this boolean shows if movement is to the right, otherwise its to the left
+  """
+  x = cmdData.linear.x
+  y = abs(cmdData.linear.y) # this is abs, because right movement is negative
+  angle = atan2(x,y)
+  distanceValue = tan(pi/2 - angle) * distanceBack + distanceRight
+  movementDistance = sqrt(pow(x,2) + pow(y,2))
+  if right:
+    i = 0
+  else:
+    i = NROFDATAPOINTS-1
+  if laserData.ranges[i] < distanceValue + movementDistance:
+    return False
+  # diagonal safeBox seems safe
+  return True
 
 def safeBox(cmdData):
   """Calculates, if the safebox is indeed safe (i.e. nothing in there)."""
@@ -94,8 +130,9 @@ def calibrate():
   global distanceLeft
   global distanceRight
   global distanceFront
+  global distanceBack
   if query_yes_no("Do you know the values for the safe box?", default="no"):
-    print("Default values:\n\tleft border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
+    print("Default values:\n\tleft border: %1.3f, right border: %1.3f, front border: %1.3f, back border: %1.3f" % (distanceLeft, distanceRight, distanceFront, distanceBack))
     # directly enter safe box values
     valuesOk = False
     while not valuesOk:
@@ -108,8 +145,11 @@ def calibrate():
       # front border
       print("Enter value for front border:")
       distanceFront = readNumber()
+      # back border
+      print("Enter value for back border:")
+      distanceBack = readNumber()
       # check if values are ok
-      print("left border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
+      print("left border: %1.3f, right border: %1.3f, front border: %1.3f, back border: %1.3f" % (distanceLeft, distanceRight, distanceFront, distanceBack))
       valuesOk = query_yes_no("Are these values correct?", default="yes")
   else:
     # enter values using the laser scanner itsself
@@ -127,8 +167,19 @@ def calibrate():
       print("%s border: Put calibration object on the %s border, then press return." % ("front", "front"))
       sys.stdin.readline()
       distanceFront = laserData.ranges[NROFDATAPOINTS/2-1]
+      print("%s border: Put calibration object on the %s border+length (see documentation), then press return. You can also enter this value manually or type 'n' to use the current value (%1.3f)." % ("back", "right", distanceBack))
+      line = sys.stdin.readline()
+      if line == "n":
+        print("using default value")
+      elif isNumber(line):
+        print("using numerical value")
+        distanceBack = float(line)
+      else:
+        print("using sensor data")
+        distanceBack = laserData.ranges[0] - distanceRight
+      # back border
       # Check if values are good
-      print("left border: %1.3f, right border: %1.3f, front border: %1.3f" % (distanceLeft, distanceRight, distanceFront))
+      print("left border: %1.3f, right border: %1.3f, front border: %1.3f, back border: %1.3f" % (distanceLeft, distanceRight, distanceFront, distanceBack))
       valuesOk = query_yes_no("Do these values seem correct?", default="yes")
   calculateSafeBox()
   return None
