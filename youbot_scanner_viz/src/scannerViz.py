@@ -12,7 +12,7 @@ NROFDIRS      = 9
 # if this is changed, printMainDirections has to be changed as well!
 NROFDIGITS    = 3
 SCANNERANGLE  = 180
-NROFDATAPOINTS = 640
+NROFDATAPOINTS = 512
 ### END MAGIC NUMBERS
 
 # execute this every time data is received
@@ -51,6 +51,7 @@ def laserCalc(data):
   laser = []
   for range in data.ranges:
     laser.append(range)
+  print len(laser)
   return laser
 
 def snipDirections(ranges):
@@ -68,7 +69,8 @@ def init():
   # Possibly mutliple clients want to display scanner data
   rospy.init_node('scannerViz', anonymous=True)
   # Subscribe to Sensor data
-  rospy.Subscriber("/youbot/scan_front", LaserScan, laserCallback)
+  #rospy.Subscriber("/youbot/scan_front", LaserScan, laserCallback)
+  rospy.Subscriber("/scan", LaserScan, laserCallback)
   # Don't close this until node is stopped.
   rospy.spin()
 
