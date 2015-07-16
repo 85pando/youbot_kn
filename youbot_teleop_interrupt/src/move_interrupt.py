@@ -16,7 +16,7 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 
 ### BEGIN MAGIC NUMBERS
-NROFDATAPOINTS        = 640
+NROFDATAPOINTS        = 512
 ROBOTWIDTH            = 380
 ROBOTLENGTH           = 580
 ### END MAGIC NUMBERS
@@ -311,11 +311,11 @@ class SafeBoxAngleException(Error):
 # default python boilerplate
 if __name__ == "__main__":
   # want to send movement message to actual control
-  pub = rospy.Publisher('/youbot/cmd_vel', Twist, queue_size=1)
+  pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
   # want to receive movement commands from other nodes
   rospy.Subscriber('/youbot/cmd_vel_safe', Twist, receiveCmd)
   # want to receive messages from the laser scanner
-  rospy.Subscriber('/youbot/scan_front', LaserScan, receiveLaser)
+  rospy.Subscriber('/scan', LaserScan, receiveLaser)
   # initialize node
   rospy.init_node('base_move_interrupt', anonymous=False)
   # ask the user if the laserScanner is to be calibrated
