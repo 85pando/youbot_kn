@@ -37,7 +37,7 @@ def receiveCmd(cmdData):
     pub.publish(cmdData)
     return None
   else:
-    printInterrupt()
+    stopRobot()
     return None
 
 def isMovementDirectionClear(cmdData):
@@ -121,9 +121,14 @@ def safeBox(movementDistance):
   # We have found nothing in the Safe Box
   return True
 
-def printInterrupt():
+def stopRobot():
   """Print an interrupt message."""
+  global lastCmd
   print("Movement interrupted: %u s" % laserData.header.stamp.secs)
+  lastCmd.linear.x  = 0
+  lastCmd.linear.y  = 0
+  lastCmd.angular.z = 0
+  pub.publish(lastCmd)
 
 def receiveLaser(laser):
   """The LaserScanner has send a new scan. Make it processable."""
