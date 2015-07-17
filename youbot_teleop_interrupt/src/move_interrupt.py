@@ -27,10 +27,22 @@ distanceLeft   = 0.200 # wheel end is 190
 distanceRight  = 0.200 # wheel end is 190
 distanceFront  = 0.100 #
 distanceBack   = 0.590 # length of the robot is 580
+lastCmd        = Twist()
 ### END GLOBAL VARIABLES
 
 def receiveCmd(cmdData):
   """A movement command is received, process it!"""
+  if checkMovementDirection(cmdData):
+    # if no object in movement direction, publish
+    pub.publish(cmdData)
+    return None
+  else:
+    printInterrupt()
+    return None
+
+
+
+def checkMovementDirection(cmdData):
   # check laserScan for objects (linear movement)
   if cmdData.linear.x > 0:
     # forward
@@ -38,53 +50,42 @@ def receiveCmd(cmdData):
       # forward left
       if not safeBoxDiagonal(cmdData, NROFDATAPOINTS-1):
         # check for tail of robot
-        printInterrupt()
-        return None
+        return False
       elif not safeBox(cmdData.linear.x):
         # check safe box
-        printInterrupt
-        return None
+        return False
     elif cmdData.linear.y < 0:
       # forward right
       if not safeBoxDiagonal(cmdData, 0):
         # check for tail of robot
-        printInterrupt()
-        return None
+        return False
       elif not safeBox(cmdData.linear.x):
         # check safeBox
-        printInterrupt
-        return None
+        return False
     else:
       # pure forward movement
       if not safeBox(cmdData.linear.x):
-        return None
+        return False
   else:
     # no x-movement
     if cmdData.linear.y > 0:
       # left only movement, can not really see much here
       if laserData.ranges[NROFDATAPOINTS-1] <= distanceLeft + cmdData.linear.y:
-        printInterrupt()
-        return None
+        return False
     elif cmdData.linear.y < 0:
       # right only movement, can not really see much here
       if laserData.ranges[0] <= distanceRight - cmdData.linear.y:
-        printInterrupt()
-        return None
+        return False
     else:
       # no movement, so we don't care
       pass
-
   # check laserScan for objects (rotational movement)
   if cmdData.angular.z != 0:
     # turning left
     if not safeBox(0):
-      print("checking")
-      printInterrupt()
-      return None
-
-  # if no object in movement direction, publish
-  pub.publish(cmdData)
-  return None
+      return False
+  # did not find anything in the way
+  return True
 
 def safeBoxDiagonal(cmdData, ray):
   """Calculates if the diagonal safeBox is indeed safe.
