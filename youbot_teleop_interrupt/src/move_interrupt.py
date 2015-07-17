@@ -199,9 +199,9 @@ def printSizeWarning():
   global distanceLeft
   global distanceRight
   global distanceBack
-  if (distanceLeft + distanceRight) < ROBOTWIDTH:
+  if (distanceLeft + distanceRight) >= ROBOTWIDTH:
     print("Warning: The width of your safeBox is smaller than the robot.")
-  if (distanceRight + distanceBack) < (ROBOTLENGTH + ROBOTWIDTH/2):
+  if (distanceRight + distanceBack) >= (ROBOTLENGTH + ROBOTWIDTH/2):
     print("Warning: The length of your safeBox is smaller than the robot.")
 
 def calculateSafeBox():
