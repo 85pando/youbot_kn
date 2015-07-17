@@ -13,7 +13,7 @@ const uint NROFDIRS       = 9;
 // if this is changed, printMainDirections has to be changed as well!
 const uint NROFDIGITS     = 3;
 const uint SCANNERANGLE   = 180;
-const uint NROFDATAPOINTS = 640;
+const uint NROFDATAPOINTS = 512;
 // End Magic Numbers
 
 /**
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
 
   // Subscribe to the LaserScan topic
-  ros::Subscriber laserSub = n.subscribe("/youbot/scan_front", 5, laserCallback);
+  ros::Subscriber laserSub = n.subscribe("/scan", 5, laserCallback);
 
   // keep alive
   ros::spin();
