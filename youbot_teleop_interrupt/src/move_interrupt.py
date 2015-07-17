@@ -131,9 +131,15 @@ def stopRobot():
 
 def receiveLaser(laser):
   """The LaserScanner has send a new scan. Make it processable."""
-  # want to write into global variable
+  global lastCmd
   global laserData
+  # store new measurements
   laserData = laser
+  # if we have movement, we need to look ahead
+  if lastCmd.linear.x != 0 and lastCmd.linear.y != 0 and lastCmd.angular.z != 0 :
+    if not isMovementDirectionClear(lastCmd):
+      # sudden obstacle, stop the robot
+      stopRobot()
   return None
 
 def calibrate():
