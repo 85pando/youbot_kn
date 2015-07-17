@@ -116,7 +116,6 @@ def safeBox(movementDistance):
     forwardMovement = distanceFront + movementDistance
     # can we do this?
     if forwardSpace <= forwardMovement:
-      printInterrupt()
       return False
   # We have found nothing in the Safe Box
   return True
