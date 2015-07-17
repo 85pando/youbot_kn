@@ -32,7 +32,7 @@ lastCmd        = Twist()
 
 def receiveCmd(cmdData):
   """A movement command is received, process it!"""
-  if checkMovementDirection(cmdData):
+  if isMovementDirectionClear(cmdData):
     # if no object in movement direction, publish
     pub.publish(cmdData)
     return None
@@ -40,9 +40,7 @@ def receiveCmd(cmdData):
     printInterrupt()
     return None
 
-
-
-def checkMovementDirection(cmdData):
+def isMovementDirectionClear(cmdData):
   # check laserScan for objects (linear movement)
   if cmdData.linear.x > 0:
     # forward
