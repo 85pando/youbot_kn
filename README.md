@@ -2,6 +2,11 @@
 
 This repo contains nodes for the Konstanz Kuka Youbot.
 
+## branches
+
+* ``master`` used with the simulator
+* ``on_robot`` used on the actual robot
+
 ## youbot_scanner_viz
 
 Simple Python script to show what the laser scanner is reading.
