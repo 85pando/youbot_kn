@@ -85,8 +85,8 @@ speedModifier = {
 , 't': (0.9,0.9)
 , 'f': (1.1,1.0)
 , 'g': (0.9,1.0)
-, 'v': (1.0,0.9)
-, 'b': (1.0,1.1)
+, 'v': (1.0,1.1)
+, 'b': (1.0,0.9)
 }
 
 class TimeoutException(Exception):
