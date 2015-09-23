@@ -1,0 +1,13 @@
+<launch>
+
+<include file="$(find youbot_driver_ros_interface)/launch/youbot_driver.launch" />
+
+<!-- <node pkg="youbot_driver_ros_interface" type="youbot_driver.launch" name="youbot_driver" /> -->
+
+<param name="hokuyo_node/port" value="/dev/sensors/hokuyo" />
+
+<node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node" />
+<node pkg="youbot_teleop_interrupt" type="move_interrupt.py" name="move_interrupt" output="screen" />
+
+</launch>
+
