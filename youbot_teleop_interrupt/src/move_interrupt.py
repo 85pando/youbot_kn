@@ -319,6 +319,7 @@ if __name__ == "__main__":
   # initialize node
   rospy.init_node('base_move_interrupt', anonymous=False)
   # ask the user if the laserScanner is to be calibrated
+  calculateSafeBox()
   if query_yes_no("Do you want to calibrate the laser-scanner?", default="no"):
     calibrate();
   else:
