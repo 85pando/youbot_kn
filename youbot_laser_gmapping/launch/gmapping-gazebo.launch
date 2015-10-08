@@ -1,22 +1,14 @@
 <launch>
 
-  <!--
   <param name="use_sim_time" value="true" />
-  -->
-
+  
   <node pkg="rviz" type="rviz" name="map_visualization"/>
-
 
   <node pkg="gmapping" type="slam_gmapping" name="gmapping_thing" output="screen" >
     
-    <param name="scan" value="scan" />
-    <param name="_odom_frame" value="odom" />
-    <param name="_base_frame" value="base_link" />
-    <!--
-    <remap from="scan" to="youbot/scan_front" />
-    <remap from="base_link" to="youbot/base_link" />
-    <remap from="odom" to="youbot/odom" />
-    -->
+    <param name="scan" value="youbot/scan_front" />
+    <param name="_odom_frame" value="youbot/odom" />
+    <param name="_base_frame" value="youbot/base_link" />
     <!--
     <param name="map_update_interval" value="5.0"/>
     <param name="maxUrange" value="16.0"/>
