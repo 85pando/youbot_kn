@@ -6,7 +6,9 @@
 
 <param name="hokuyo_node/port" value="/dev/sensors/hokuyo" />
 
-<node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node" />
+<node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node">
+  <param name="frame_id" value="/base_laser_front_link" />
+</node>
 <node pkg="youbot_teleop_interrupt" type="move_interrupt.py" name="move_interrupt" output="screen" />
 
 </launch>
