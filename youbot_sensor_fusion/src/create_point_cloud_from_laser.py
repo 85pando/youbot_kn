@@ -49,21 +49,20 @@ class PointCloudCreator:
     :return A PointCloud with coordinates relative to the sensor.
     """
 
-    # TODO preprocess header information
+    # preprocess header information
     self.nrOfMeasurements = len(laserData.ranges)
-    self.halfMeasure = (nrOfMeasurements-1)/2
+    self.halfMeasure      = (self.nrOfMeasurements-1)/2
+    self.range_min        = laserData.range_min #+ 0.01 * laserData.range_min
+    self.range_max        = laserData.range_max #- 0.01 * laserData.range_max
     cloudPoint = []
 
     # for each point in the scan
     for index in range(self.nrOfMeasurements):
       xCoord = None
       yCoord = None
-      # * TODO decide if it can be used as a point
-      #if laserData.ranges[index] ISNOTANUMBERORWHATEVERWERECEIVEHERE:
-        #skip
-      #else:
-        # decide whether the measurement is in the left or right half
-        # then calculate relative coordinates
+      # points are valid if they are closer than the maximum and farther than the minimum distance
+      if (laserData.ranges[index] < self.range_max) and (laserData.ranges[index] > self.range_min):
+        # decide whether the measurement is in the left or right half or forward
         if index == self.halfMeasure:
           # direction is directly forward
           xCoord = 0
@@ -75,9 +74,8 @@ class PointCloudCreator:
           else:
             # direction in left half
             angle = pi - index * laserData.angle_increment
-          # x = cos(alpha) * r
+          # calculate relative coordinates
           xCoord = cos(angle) * laserData.ranges[index]
-          # y = sin(alpha) * r
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
         cloudPoint.append( (xCoord,yCoord) )
