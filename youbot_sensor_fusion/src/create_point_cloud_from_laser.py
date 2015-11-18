@@ -34,6 +34,12 @@ class PointCloudCreator:
     :return A PointCloud with coordinates relative to the sensor.
     """
     self.relativeFrontCloud = self.convertLaserScanToPointCloud(frontLaser)
+
+    print("=================================\n\n")
+    print(frontLaser.range_min, frontLaser.range_max)
+    print(frontLaser.ranges[0], frontLaser.ranges[319], frontLaser.ranges[639])
+    #print(self.relativeFrontCloud)
+    print(len(self.relativeFrontCloud))
     # TODO rotate+translate the cloud according to sensor position on robot
 
   def convertLaserScanToPointCloud(self, laserData):
