@@ -24,10 +24,10 @@ class PointCloudCreator:
   This class processes incoming LaserScans and creates a usable point-Cloud
   """
 
-  def __init__(self, parent, verbose):
+  def __init__(self):
     return None
 
-  def receiveFrontLaser(frontLaser):
+  def receiveFrontLaser(self, frontLaser):
     """
     The front LaserScanner has sent a new scan. Create a point cloud.
     :param frontLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
@@ -36,7 +36,7 @@ class PointCloudCreator:
     self.relativeFrontCloud = self.convertLaserScanToPointCloud(frontLaser)
     # TODO rotate+translate the cloud according to sensor position on robot
 
-  def convertLaserScanToPointCloud(laserData):
+  def convertLaserScanToPointCloud(self, laserData):
     """
     This method takes any LaserScan and produces a pointCloud relative to the sensor position.
     :param laserData: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
@@ -75,8 +75,9 @@ class PointCloudCreator:
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
         cloudPoint.append( (xCoord,yCoord) )
+#      else:
+#        print("index", index, "is out of range")
     return sorted(cloudPoint)
-
 
 # default python boilerplate
 if __name__ == "__main__":
@@ -84,6 +85,7 @@ if __name__ == "__main__":
   # create instance of the class
   cloudCreator = PointCloudCreator()
 
+  rospy.init_node('create_point_cloud_from_laser', anonymous=True)
   # want to receive messages from laser scanner
   rospy.Subscriber('/youbot/scan_front', LaserScan, cloudCreator.receiveFrontLaser)
 
