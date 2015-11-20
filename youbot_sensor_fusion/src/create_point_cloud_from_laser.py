@@ -146,8 +146,6 @@ class PointCloudCreator:
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
         cloudPoints.append( (xCoord,yCoord) )
-#      else:
-#        print("index", index, "is out of range")
     return sorted(cloudPoints)
 
 
