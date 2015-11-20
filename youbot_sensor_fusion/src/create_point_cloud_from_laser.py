@@ -35,6 +35,8 @@ class PointCloudCreator:
     self.leftTranslation  = (-.190,0)
     return None
 
+
+
   def receiveFrontLaser(self, frontLaser):
     """
     The front LaserScanner has sent a new scan. Create a point cloud.
@@ -131,7 +133,8 @@ class PointCloudCreator:
       xCoord = None
       yCoord = None
       # points are valid if they are closer than the maximum and farther than the minimum distance
-      if (laserData.ranges[index] < self.range_max) and (laserData.ranges[index] > self.range_min):
+      if ( (laserData.ranges[index] < self.range_max) and
+           (laserData.ranges[index] > self.range_min) ):
         # decide whether the measurement is in the left or right half or forward
         if index == self.halfMeasure:
           # direction is directly forward
