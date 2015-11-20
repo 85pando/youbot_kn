@@ -126,7 +126,7 @@ class PointCloudCreator:
     self.halfMeasure      = (self.nrOfMeasurements-1)/2
     self.range_min        = laserData.range_min #+ 0.01 * laserData.range_min
     self.range_max        = laserData.range_max #- 0.01 * laserData.range_max
-    cloudPoint = []
+    cloudPoints = []
 
     # for each point in the scan
     for index in range(self.nrOfMeasurements):
