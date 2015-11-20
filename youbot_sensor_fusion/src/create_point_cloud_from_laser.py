@@ -25,6 +25,14 @@ class PointCloudCreator:
   """
 
   def __init__(self):
+    self.frontRotation    = 0
+    self.frontTranslation = (0,.290)
+    self.rightRotation    = 90
+    self.rightTranslation = (.190,0)
+    self.backRotation     = 180
+    self.backTranslation  = (0,-.290)
+    self.leftRotation     = 270
+    self.leftTranslation  = (-.190,0)
     return None
 
   def receiveFrontLaser(self, frontLaser):
@@ -33,7 +41,69 @@ class PointCloudCreator:
     :param frontLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
     :return A PointCloud with coordinates relative to the sensor.
     """
-    self.relativeFrontCloud = self.convertLaserScanToPointCloud(frontLaser)
+    frontCloud = self.convertLaserScanToPointCloud(frontLaser)
+
+    # rotate+translate the cloud according to sensor position on robot
+    self.frontCloud = self.relocatePointCloud(frontCloud,
+                                              self.frontRotation,
+                                              self.frontTranslation
+                                              )
+    return None
+
+
+  def relocatePointCloud(self, pointCloud, rotation, translation):
+    """
+    This method takes a point cloud and rotates and translates it to it actual location.
+    :param oldPointCloud: The point cloud is expected to be in the form of an array of points with x and y coordinates like so [(x1,y1), (x2,y2), ...]
+    :param rotation: Rotation is given clockwise. Currently only 0, 90, 180 and 270 degree are supported.
+    :param translation: The translation should represent the location of the sensor in the real robot. It has to be a tuple (x,y).
+    :return The rotated and translated point cloud.
+    """
+
+    # rotate the point cloud
+    rotatedPointCloud = []
+    if rotation == 0:
+      # don't need to rotate here
+      rotatedPointCloud = pointCloud
+      pass
+    elif rotation == 90:
+      # rotate each point 90 degree
+      for point in pointCloud:
+        x = point[0]
+        y = point[1]
+        rotatedPointCloud.append((y,-x))
+    elif rotation == 180:
+      # rotate each point 180 degree
+      for point in pointCloud:
+        x = point[0]
+        y = point[1]
+        rotatedPointCloud.append((-x,-y))
+    elif rotation == 270:
+      # rotate each point 270 degree
+      for point in pointCloud:
+        x = point[0]
+        y = point[1]
+        rotatedPointCloud.append((-y,x))
+    else:
+      raise InvalidRotationException(rotation)
+
+    # don't need the original pointCloud any more
+    del pointCloud
+
+    # translate each point cloud
+    rotatedAndTranslatedPointCloud = []
+    for point in rotatedPointCloud:
+      x  = point[0]
+      xt = translation[0]
+      y  = point[1]
+      yt = translation[1]
+      rotatedAndTranslatedPointCloud.append((x+xt, y+yt))
+
+    # don't need rotated point any more
+    del rotatedPointCloud
+
+    return rotatedAndTranslatedPointCloud
+
 
     print("=================================\n\n")
     print(frontLaser.range_min, frontLaser.range_max)
@@ -78,10 +148,20 @@ class PointCloudCreator:
           xCoord = cos(angle) * laserData.ranges[index]
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
-        cloudPoint.append( (xCoord,yCoord) )
+        cloudPoints.append( (xCoord,yCoord) )
 #      else:
 #        print("index", index, "is out of range")
-    return sorted(cloudPoint)
+    return sorted(cloudPoints)
+
+
+
+class InvalidRotationException(Exception):
+  def __init__(self, angle):
+    self.angle = angle
+  def __str__(self):
+    return repr("Invalid rotation angle:" + self.angle)
+
+
 
 # default python boilerplate
 if __name__ == "__main__":
