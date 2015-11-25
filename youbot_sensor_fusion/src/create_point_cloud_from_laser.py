@@ -17,6 +17,8 @@ import rospy
 from os import system
 from sensor_msgs.msg import LaserScan
 from math import pi, sqrt, pow, sin, cos #, tan, atan2
+### Imports for tests
+import random
 ### End Imports
 
 class PointCloudCreator:
@@ -41,15 +43,60 @@ class PointCloudCreator:
     """
     The front LaserScanner has sent a new scan. Create a point cloud.
     :param frontLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
-    :return A PointCloud with coordinates relative to the sensor.
+    :return A PointCloud with coordinates relative to the center of the robot.
     """
     frontCloud = self.convertLaserScanToPointCloud(frontLaser)
-
-    # rotate+translate the cloud according to sensor position on robot
     self.frontCloud = self.relocatePointCloud(frontCloud,
                                               self.frontRotation,
                                               self.frontTranslation
                                               )
+    ## FIXME Remove this code ## it just simulates another sensor update
+    self.receiveRightLaser(frontLaser)
+    ## END remove this code ##
+
+    self.writePointCloudToFile('frontCloud.csv', self.frontCloud)
+    return None
+
+
+  def receiveRightLaser(self, rightLaser):
+    """
+    The right LaserScanner has sent a new scan. Create a point cloud.
+    :param rightLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
+    :return A PointCloud with coordinates relative to the center of the robot.
+    """
+    rightCloud = self.convertLaserScanToPointCloud(rightLaser)
+    ## FIXME Remove this code ## it just mirrors the data of the first sensor
+    newCloud = []
+    random.seed("42")
+    for point in rightCloud:
+      xrand = random.randint(0,10)/1000
+      yrand = random.randint(0,10)/1000
+      x = point[0] + xrand
+      y = point[1] + yrand
+      newCloud.append((y,x))
+    rightCloud = newCloud
+    ## END remove this code ##
+    self.rightCloud = self.relocatePointCloud(rightCloud,
+                                              self.rightRotation,
+                                              self.rightTranslation
+                                              )
+    self.writePointCloudToFile('rightCloud.csv', self.rightCloud)
+    return None
+
+
+  def writePointCloudToFile(self, fileName, pointCloud):
+    f = open(fileName, 'w')
+    # print header
+    f.write('x,y\n')
+    #print('x,y')
+    for point in self.frontCloud:
+      # print one point per line
+      f.write(str(point[0]))
+      f.write(',')
+      f.write(str(point[1]))
+      f.write('\n')
+    f.close()
+    print("====== wrote", fileName, "======")
     return None
 
 
