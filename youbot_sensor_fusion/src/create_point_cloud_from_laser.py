@@ -195,12 +195,7 @@ class PointCloudCreator:
           xCoord = 0
           yCoord = laserData.ranges[index]
         else:
-          if index < self.halfMeasure:
-            # direction in right half
-            angle = index * laserData.angle_increment
-          else:
-            # direction in left half
-            angle = pi - index * laserData.angle_increment
+          angle = index * laserData.angle_increment
           # calculate relative coordinates
           xCoord = cos(angle) * laserData.ranges[index]
           yCoord = sin(angle) * laserData.ranges[index]
