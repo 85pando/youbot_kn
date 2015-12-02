@@ -12,6 +12,8 @@ See the full license text here: https://creativecommons.org/licenses/by-sa/3.0/l
 """
 
 ### Imports
+from __future__ import print_function
+from __future__ import division
 import sys
 import rospy
 from os import system
@@ -29,12 +31,16 @@ class PointCloudCreator:
   def __init__(self):
     self.frontRotation    = 0
     self.frontTranslation = (0,.290)
+    self.frontHeight      = .005
     self.rightRotation    = 90
     self.rightTranslation = (.190,0)
+    self.rightHeight      = .005
     self.backRotation     = 180
     self.backTranslation  = (0,-.290)
+    self.backHeight      = .005
     self.leftRotation     = 270
     self.leftTranslation  = (-.190,0)
+    self.leftHeight      = .005
     return None
 
 
@@ -45,7 +51,7 @@ class PointCloudCreator:
     :param frontLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
     :return A PointCloud with coordinates relative to the center of the robot.
     """
-    frontCloud = self.convertLaserScanToPointCloud(frontLaser)
+    frontCloud = self.convertLaserScanToPointCloud(frontLaser, self.frontHeight)
     self.frontCloud = self.relocatePointCloud(frontCloud,
                                               self.frontRotation,
                                               self.frontTranslation
@@ -64,7 +70,7 @@ class PointCloudCreator:
     :param rightLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
     :return A PointCloud with coordinates relative to the center of the robot.
     """
-    rightCloud = self.convertLaserScanToPointCloud(rightLaser)
+    rightCloud = self.convertLaserScanToPointCloud(rightLaser, self.rightHeight)
     ## FIXME Remove this code ## it just mirrors the data of the first sensor
     newCloud = []
     random.seed("42")
@@ -73,7 +79,8 @@ class PointCloudCreator:
       yrand = random.randint(0,10)/1000
       x = point[0] + xrand
       y = point[1] + yrand
-      newCloud.append((y,x))
+      z = point[2]
+      newCloud.append((y, x, z))
     rightCloud = newCloud
     ## END remove this code ##
     self.rightCloud = self.relocatePointCloud(rightCloud,
@@ -87,16 +94,18 @@ class PointCloudCreator:
   def writePointCloudToFile(self, fileName, pointCloud):
     f = open(fileName, 'w')
     # print header
-    f.write('x,y\n')
+    f.write('x,y,z\n')
     #print('x,y')
-    for point in self.frontCloud:
+    for point in pointCloud:
       # print one point per line
       f.write(str(point[0]))
       f.write(',')
       f.write(str(point[1]))
+      f.write(',')
+      f.write(str(point[2]))
       f.write('\n')
     f.close()
-    print("====== wrote", fileName, "======")
+    print("====== wrote", fileName, len(pointCloud), "======")
     return None
 
 
@@ -120,19 +129,22 @@ class PointCloudCreator:
       for point in pointCloud:
         x = point[0]
         y = point[1]
-        rotatedPointCloud.append((y,-x))
+        z = point[2]
+        rotatedPointCloud.append((y, -x, z))
     elif rotation == 180:
       # rotate each point 180 degree
       for point in pointCloud:
         x = point[0]
         y = point[1]
-        rotatedPointCloud.append((-x,-y))
+        z = point[2]
+        rotatedPointCloud.append((-x, -y, z))
     elif rotation == 270:
       # rotate each point 270 degree
       for point in pointCloud:
         x = point[0]
         y = point[1]
-        rotatedPointCloud.append((-y,x))
+        z = point[2]
+        rotatedPointCloud.append((-y, x, z))
     else:
       raise InvalidRotationException(rotation)
 
@@ -146,7 +158,8 @@ class PointCloudCreator:
       xt = translation[0]
       y  = point[1]
       yt = translation[1]
-      rotatedAndTranslatedPointCloud.append((x+xt, y+yt))
+      z = point[2]
+      rotatedAndTranslatedPointCloud.append((x+xt, y+yt, z))
 
     # don't need rotated point any more
     del rotatedPointCloud
@@ -155,7 +168,7 @@ class PointCloudCreator:
 
 
 
-  def convertLaserScanToPointCloud(self, laserData):
+  def convertLaserScanToPointCloud(self, laserData, zCoord):
     """
     This method takes any LaserScan and produces a pointCloud relative to the sensor position.
     :param laserData: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
@@ -192,7 +205,7 @@ class PointCloudCreator:
           xCoord = cos(angle) * laserData.ranges[index]
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
-        cloudPoints.append( (xCoord,yCoord) )
+        cloudPoints.append( (xCoord,yCoord,zCoord) )
     return sorted(cloudPoints)
 
 
