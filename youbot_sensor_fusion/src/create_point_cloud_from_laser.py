@@ -75,13 +75,17 @@ class PointCloudCreator:
     newCloud = []
     random.seed("42")
     for point in rightCloud:
-      xrand = random.randint(0,10)/1000
-      yrand = random.randint(0,10)/1000
+      xrand = random.randint(0,10)/500
+      yrand = random.randint(0,10)/500
       x = point[0] + xrand
       y = point[1] + yrand
       z = point[2]
-      newCloud.append((y, x, z))
-    rightCloud = newCloud
+      newCloud.append((x, y, z))
+#    rightCloud = newCloud
+    rightCloud = self.relocatePointCloud(newCloud,
+                                         self.leftRotation,
+                                         self.leftTranslation
+                                         )
     ## END remove this code ##
     self.rightCloud = self.relocatePointCloud(rightCloud,
                                               self.rightRotation,
@@ -124,21 +128,21 @@ class PointCloudCreator:
       # don't need to rotate here
       rotatedPointCloud = pointCloud
       pass
-    elif rotation == 90:
+    elif rotation == 90 or rotation == -270:
       # rotate each point 90 degree
       for point in pointCloud:
         x = point[0]
         y = point[1]
         z = point[2]
         rotatedPointCloud.append((y, -x, z))
-    elif rotation == 180:
+    elif rotation == 180 or rotation == -180:
       # rotate each point 180 degree
       for point in pointCloud:
         x = point[0]
         y = point[1]
         z = point[2]
         rotatedPointCloud.append((-x, -y, z))
-    elif rotation == 270:
+    elif rotation == 270 or rotation == -90:
       # rotate each point 270 degree
       for point in pointCloud:
         x = point[0]
@@ -201,7 +205,7 @@ class PointCloudCreator:
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
         cloudPoints.append( (xCoord,yCoord,zCoord) )
-    return sorted(cloudPoints)
+    return cloudPoints
 
 
 
