@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
 )
+find_package(libpointmatcher 1.1.0 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -116,7 +117,9 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${POINTMATCHER_INCLUDE_DIRS}
 )
+message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 
 ## Declare a C++ library
 # add_library(youbot_sensor_fusion
@@ -130,6 +133,8 @@ include_directories(
 
 ## Declare a C++ executable
 # add_executable(youbot_sensor_fusion_node src/youbot_sensor_fusion_node.cpp)
+add_executable(convert src/convert.cpp)
+target_link_libraries(convert ${libpointmatcher_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
