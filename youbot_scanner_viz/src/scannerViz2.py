@@ -38,7 +38,7 @@ def printMainDirections(seqNr, nrOfDirs, ranges):
   for rangei in ranges:
     rangeString += " %1.3f |" % rangei
   # prettyPrint - Print the Strings
-  print("Sequence Number: %10u" % seqNr)
+  print("Right, Sequence Number: %10u" % seqNr)
   print(lineString)
   print(angleString)
   print(lineString)
@@ -69,7 +69,7 @@ def init():
   rospy.init_node('scannerViz', anonymous=True)
   # Subscribe to Sensor data
   #rospy.Subscriber("/youbot/scan_front", LaserScan, laserCallback)
-  rospy.Subscriber("/scan", LaserScan, laserCallback)
+  rospy.Subscriber("/scan_right", LaserScan, laserCallback)
   # Don't close this until node is stopped.
   rospy.spin()
 
