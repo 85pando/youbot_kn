@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import division
 import sys
 import rospy
+import csv
 from os import system
 from sensor_msgs.msg import LaserScan
 from math import pi, sqrt, pow, sin, cos #, tan, atan2
@@ -72,17 +73,17 @@ class PointCloudCreator:
     """
     rightCloud = self.convertLaserScanToPointCloud(rightLaser, self.rightHeight)
     ## FIXME Remove this code ## it just mirrors the data of the first sensor
-    newCloud = []
-    random.seed("42")
-    for point in rightCloud:
-      xrand = random.randint(0,10)/500
-      yrand = random.randint(0,10)/500
-      x = point[0] + xrand
-      y = point[1] + yrand
-      z = point[2]
-      newCloud.append((x, y, z))
+#    newCloud = []
+#    random.seed("42")
+#    for point in rightCloud:
+#      xrand = random.randint(0,10)/500
+#      yrand = random.randint(0,10)/500
+#      x = point[0] + xrand
+#      y = point[1] + yrand
+#      z = point[2]
+#      newCloud.append((x, y, z))
 #    rightCloud = newCloud
-    rightCloud = self.relocatePointCloud(newCloud,
+    rightCloud = self.relocatePointCloud(rightCloud,
                                          self.leftRotation,
                                          self.leftTranslation
                                          )
@@ -97,17 +98,10 @@ class PointCloudCreator:
 
   def writePointCloudToFile(self, fileName, pointCloud):
     f = open(fileName, 'w')
+    outwriter = csv.writer(f)
     # print header
-    f.write('x,y,z\n')
-    #print('x,y')
-    for point in pointCloud:
-      # print one point per line
-      f.write(str(point[0]))
-      f.write(',')
-      f.write(str(point[1]))
-      f.write(',')
-      f.write(str(point[2]))
-      f.write('\n')
+    outwriter.writerow(["x", "y", "z"])
+    outwriter.writerows(pointCloud)
     f.close()
     print("====== wrote", fileName, len(pointCloud), "======")
     return None
