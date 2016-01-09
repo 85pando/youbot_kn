@@ -313,7 +313,7 @@ if __name__ == "__main__":
   # want to send movement message to actual control
   pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
   # want to receive movement commands from other nodes
-  rospy.Subscriber('/youbot/cmd_vel_safe', Twist, receiveCmd)
+  rospy.Subscriber('/cmd_vel_safe', Twist, receiveCmd)
   # want to receive messages from the laser scanner
   rospy.Subscriber('/scan', LaserScan, receiveLaser)
   # initialize node
