@@ -85,8 +85,8 @@ speedModifier = {
 , 't': (0.9,0.9)
 , 'f': (1.1,1.0)
 , 'g': (0.9,1.0)
-, 'v': (1.0,0.9)
-, 'b': (1.0,1.1)
+, 'v': (1.0,1.1)
+, 'b': (1.0,0.9)
 }
 
 class TimeoutException(Exception):
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
   # movement and rotation speed values
   speed = 0.1
-  turn  = 0.1
+  turn  = 0.3
 
   # number of status messages printed to console
   status = 0
@@ -155,7 +155,7 @@ if __name__ == "__main__":
       elif key == " ":
         # reset speed values
         speed = 0.1
-        turn  = 0.1
+        turn  = 0.3
         print(vels(speed,turn)); status += 1
 
       else:

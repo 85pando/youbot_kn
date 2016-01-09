@@ -1,0 +1,11 @@
+<launch>
+
+  <!-- start gazebo simulator with youbot and an empty room -->
+  <include file="$(find youbot_gazebo)/launch/youbot.launch" />
+
+  <node pkg="youbot_teleop_interrupt" type="move_interrupt.py" name="move_interrupt" output="screen" />
+
+</launch>
+
+
+
