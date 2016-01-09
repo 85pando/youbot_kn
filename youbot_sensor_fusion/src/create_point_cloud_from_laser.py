@@ -30,17 +30,19 @@ class PointCloudCreator:
   """
 
   def __init__(self):
+    # lengths are in m
+    # rotations are in degree
     self.frontRotation    = 0
-    self.frontTranslation = (0,.290)
+    self.frontTranslation = (0,.220)
     self.frontHeight      = .005
     self.rightRotation    = 90
-    self.rightTranslation = (.190,0)
+    self.rightTranslation = (.110,0)
     self.rightHeight      = .005
     self.backRotation     = 180
-    self.backTranslation  = (0,-.290)
+    self.backTranslation  = (0,-.220)
     self.backHeight      = .005
     self.leftRotation     = 270
-    self.leftTranslation  = (-.190,0)
+    self.leftTranslation  = (-.110,0)
     self.leftHeight      = .005
     return None
 
@@ -57,9 +59,6 @@ class PointCloudCreator:
                                               self.frontRotation,
                                               self.frontTranslation
                                               )
-    ## FIXME Remove this code ## it just simulates another sensor update
-    self.receiveRightLaser(frontLaser)
-    ## END remove this code ##
 
     self.writePointCloudToFile('frontCloud.csv', self.frontCloud)
     return None
@@ -72,17 +71,6 @@ class PointCloudCreator:
     :return A PointCloud with coordinates relative to the center of the robot.
     """
     rightCloud = self.convertLaserScanToPointCloud(rightLaser, self.rightHeight)
-    ## FIXME Remove this code ## it just mirrors the data of the first sensor
-#    newCloud = []
-#    random.seed("42")
-#    for point in rightCloud:
-#      xrand = random.randint(0,10)/500
-#      yrand = random.randint(0,10)/500
-#      x = point[0] + xrand
-#      y = point[1] + yrand
-#      z = point[2]
-#      newCloud.append((x, y, z))
-#    rightCloud = newCloud
     rightCloud = self.relocatePointCloud(rightCloud,
                                          self.leftRotation,
                                          self.leftTranslation
@@ -219,7 +207,7 @@ if __name__ == "__main__":
 
   rospy.init_node('create_point_cloud_from_laser', anonymous=True)
   # want to receive messages from laser scanner
-  rospy.Subscriber('/youbot/scan_front', LaserScan, cloudCreator.receiveFrontLaser)
-
+  rospy.Subscriber('/scan', LaserScan, cloudCreator.receiveFrontLaser)
+  rospy.Subscriber('/scan_right', LaserScan, cloudCreator.receiveRightLaser)
   # keep alive
   rospy.spin()
