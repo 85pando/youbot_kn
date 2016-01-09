@@ -68,7 +68,6 @@ def init():
   # Possibly mutliple clients want to display scanner data
   rospy.init_node('scannerViz', anonymous=True)
   # Subscribe to Sensor data
-  #rospy.Subscriber("/youbot/scan_front", LaserScan, laserCallback)
   rospy.Subscriber("/scan", LaserScan, laserCallback)
   # Don't close this until node is stopped.
   rospy.spin()
