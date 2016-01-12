@@ -34,16 +34,16 @@ class PointCloudCreator:
     # rotations are in degree
     self.frontRotation    = 0
     self.frontTranslation = (0,.220)
-    self.frontHeight      = .005
+    self.frontHeight      = .001
     self.rightRotation    = 90
     self.rightTranslation = (.110,0)
-    self.rightHeight      = .005
+    self.rightHeight      = .001
     self.backRotation     = 180
     self.backTranslation  = (0,-.220)
-    self.backHeight      = .005
+    self.backHeight      = .001
     self.leftRotation     = 270
     self.leftTranslation  = (-.110,0)
-    self.leftHeight      = .005
+    self.leftHeight      = .001
     return None
 
 
@@ -55,12 +55,11 @@ class PointCloudCreator:
     :return A PointCloud with coordinates relative to the center of the robot.
     """
     frontCloud = self.convertLaserScanToPointCloud(frontLaser, self.frontHeight)
-    self.frontCloud = self.relocatePointCloud(frontCloud,
+    frontCloud = self.relocatePointCloud(frontCloud,
                                               self.frontRotation,
                                               self.frontTranslation
                                               )
-
-    self.writePointCloudToFile('frontCloud.csv', self.frontCloud)
+    self.writePointCloudToFile('frontCloud.csv', frontCloud)
     return None
 
 
@@ -71,15 +70,11 @@ class PointCloudCreator:
     :return A PointCloud with coordinates relative to the center of the robot.
     """
     rightCloud = self.convertLaserScanToPointCloud(rightLaser, self.rightHeight)
-    rightCloud = self.relocatePointCloud(rightCloud,
-                                         self.leftRotation,
-                                         self.leftTranslation
-                                         )
-    ## END remove this code ##
     self.rightCloud = self.relocatePointCloud(rightCloud,
                                               self.rightRotation,
                                               self.rightTranslation
                                               )
+    del rightCloud
     self.writePointCloudToFile('rightCloud.csv', self.rightCloud)
     return None
 
