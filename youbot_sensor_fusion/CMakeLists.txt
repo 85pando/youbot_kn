@@ -6,8 +6,11 @@ project(youbot_sensor_fusion)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+#  pcl_conversions
+#  pcl_ros
   roscpp
   rospy
+  sensor_msgs
   std_msgs
 )
 find_package(libpointmatcher 1.1.0 REQUIRED)
@@ -69,7 +72,9 @@ find_package(libpointmatcher 1.1.0 REQUIRED)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   std_msgs
+#   sensor_msgs
+#   geometry_msgs
+#   std_msgs
 # )
 
 ################################################
@@ -104,7 +109,8 @@ find_package(libpointmatcher 1.1.0 REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES youbot_sensor_fusion
-#  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs
+#  CATKIN_DEPENDS pcl_conversions pcl_ros roscpp rospy sensor_msgs
+#  geometry_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -135,6 +141,8 @@ message(STATUS "Using libpointmatcher version ${libpointmatcher_VERSION}")
 # add_executable(youbot_sensor_fusion_node src/youbot_sensor_fusion_node.cpp)
 add_executable(convert src/convert.cpp)
 target_link_libraries(convert ${libpointmatcher_LIBRARIES})
+#add_executable(sensor_fusion src/sensor_fusion.cpp)
+#target_link_libraries(sensor_fusion ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
