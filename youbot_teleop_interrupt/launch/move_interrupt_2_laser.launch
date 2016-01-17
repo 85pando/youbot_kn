@@ -1,0 +1,21 @@
+<launch>
+
+<include file="$(find youbot_driver_ros_interface)/launch/youbot_driver.launch" />
+
+<!-- <node pkg="youbot_driver_ros_interface" type="youbot_driver.launch" name="youbot_driver" /> -->
+
+<param name="hokuyo_node_front/port" value="/dev/sensors/hokuyo_front" />
+<param name="hokuyo_node_right/port" value="/dev/sensors/hokuyo_right" />
+
+<node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_front">
+	<param name="frame_id" value="base_laser_front_link" />
+</node>
+<node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_right">
+	<param name="frame_id" value="base_laser_front_link" />
+	<remap from="scan" to="scan_right" />
+</node>
+
+<node pkg="youbot_teleop_interrupt" type="move_interrupt.py" name="move_interrupt" output="screen" />
+
+</launch>
+
