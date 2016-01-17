@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This script will take the data of a LaserScan and create a point cloud out of it.
+This script will take the data of LaserScans and create a point clouds out of it.
 
 Copyright (C) 2015 Stephan Heidinger
 stephan.heidinger@uni-konstanz.de
@@ -111,21 +111,21 @@ class PointCloudCreator:
         x = point[0]
         y = point[1]
         z = point[2]
-        rotatedPointCloud.append((y, -x, z))
+        rotatedPointCloud.append([y, -x, z])
     elif rotation == 180 or rotation == -180:
       # rotate each point 180 degree
       for point in pointCloud:
         x = point[0]
         y = point[1]
         z = point[2]
-        rotatedPointCloud.append((-x, -y, z))
+        rotatedPointCloud.append([-x, -y, z])
     elif rotation == 270 or rotation == -90:
       # rotate each point 270 degree
       for point in pointCloud:
         x = point[0]
         y = point[1]
         z = point[2]
-        rotatedPointCloud.append((-y, x, z))
+        rotatedPointCloud.append([-y, x, z])
     else:
       raise InvalidRotationException(rotation)
 
@@ -140,7 +140,7 @@ class PointCloudCreator:
       y  = point[1]
       yt = translation[1]
       z = point[2]
-      rotatedAndTranslatedPointCloud.append((x+xt, y+yt, z))
+      rotatedAndTranslatedPointCloud.append([x+xt, y+yt, z])
 
     # don't need rotated point any more
     del rotatedPointCloud
@@ -181,7 +181,7 @@ class PointCloudCreator:
           xCoord = cos(angle) * laserData.ranges[index]
           yCoord = sin(angle) * laserData.ranges[index]
         # put into output array
-        cloudPoints.append( (xCoord,yCoord,zCoord) )
+        cloudPoints.append( [xCoord,yCoord,zCoord] )
     return cloudPoints
 
 
