@@ -51,6 +51,7 @@ def laserCalc(data):
   laser = []
   for range in data.ranges:
     laser.append(range)
+  print len(laser)
   return laser
 
 def snipDirections(ranges):
