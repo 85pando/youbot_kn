@@ -74,7 +74,7 @@ class PointCloudCreator:
                                               self.frontRotation,
                                               self.frontTranslation
                                               )
-    self.writePointCloudToFile('frontCloud.csv', frontCloud)
+    self.writePointCloudToFile(self.frontCloudPath, frontCloud)
     self.frontCloud = frontCloud
     # frontCloud can now be processed
     self.frontReady = True
@@ -94,7 +94,7 @@ class PointCloudCreator:
                                               self.rightTranslation
                                               )
     del rightCloud
-    self.writePointCloudToFile('rightCloud.csv', self.rightCloud)
+    self.writePointCloudToFile(self.rightCloudPath, self.rightCloud)
     # don't need to save rightCloud, this will come from the ICP result
     self.rightReady
     self.executeIcp
@@ -116,7 +116,7 @@ class PointCloudCreator:
   def executeIcp(self):
     if (not self.frontReady) and (not self.rightReady) and (not self.leftReady) and (not self.kinectReady):
       # there is a cloud that is not yet ready
-      print("Not all ready")
+      #print("Not all ready")
       return None
     # all clouds are ready, reset check values
     self.resetICPCheckValues()
