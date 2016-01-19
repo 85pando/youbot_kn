@@ -17,7 +17,7 @@ from __future__ import division
 import sys
 import rospy
 import csv
-from os import system, path
+from os import system, path, chdir, devnull
 import subprocess
 from sensor_msgs.msg import LaserScan
 import sensor_msgs.point_cloud2 as pc2
@@ -55,7 +55,8 @@ class PointCloudCreator:
     self.leftCloudPath    = '/tmp/leftCloud.csv'
     self.kinectCloudPath  = '/tmp/kinectCloud.csv'
     self.icpResultDir     = '/tmp/'
-    self.icpResultPath    = '/tmp/icp_data_out.vtk'
+    self.icpResultPath    = '/tmp/test_data_out.vtk'
+    self.devnull          = open(devnull, 'w')
     
     # publisher
     self.cloudPublisher = cloudPublisher
@@ -127,36 +128,46 @@ class PointCloudCreator:
       self.createLaserICPConfig()
       
     print("Executing ICP")
+    # change into /tmp/ so that result is in the expected place
+    chdir("/tmp/")
     frontCloud = self.frontCloud
     
     
     # TODO execute ICP front <-> right
-    
-    # TODO extract new rightCloud from vtk-file
+    subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
+                     self.frontCloudPath, self.rightCloudPath],
+                     stdout=self.devnull)
+
+    # extract new rightCloud from vtk-file
     rightCloud = extractPoints(self.icpResultPath)
+    print(rightCloud)
     return None
     
-    # TODO execute ICP front <-> left
-    
-    # TODO extract new leftCloud from vtk-file
+    # execute ICP front <-> left, FIXME uncomment this, when second laser present
+    #subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
+    #                 self.frontCloudPath, self.leftCloudPath],
+    #                 stdout=self.devnull)
+    # extract new leftCloud from vtk-file, FIXME use comment, as soon as left laser present
     leftCloud = [] # extractPoints(self.icpResultPath)
     
-    # TODO combine frontCloud + rightCloud
+    # combine frontCloud + rightCloud
     frontRightCloud = frontCloud + rightCloud
     del frontCloud
     del rightCloud
     
-    # TODO combine frontRightCloud + leftCloud
-    
+    # combine frontRightCloud + leftCloud
     laserCloud = frontRightCloud + leftCloud
     del leftCloud
     
-    # TODO execute ICP laserCloud <-> kinectCloud
-    
-    # TODO extract new kinectCloud from vtk-file
+    # execute ICP laserCloud <-> kinectCloud, FIXME uncomment this, when kinect present
+    #subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
+    #                 self.kinectCloudPath, self.rightCloudPath],
+    #                 stdout=self.devnull)
+    #
+    # extract new kinectCloud from vtk-file, FIXME use comment as soon as kinect present
     kinectCloud = [] # extractPoints(self.icpResultPath)
     
-    # TODO combine finalCloud = laserCloud + kinectCloud
+    # combine finalCloud = laserCloud + kinectCloud
     finalCloud = laserCloud = kinectCloud
     del laserCloud
     del kinectCloud
@@ -316,8 +327,7 @@ class PointCloudCreator:
     f.write("      smoothLength: 4\n")
     f.write("\n")
     f.write("inspector:\n")
-    f.write("  VTKFileInspector:\n")
-    f.write("      baseFileName: /tmp/icp\n")
+    f.write("  VTKFileInspector\n")
     f.write("\n")
     f.write("logger:\n")
     f.write("  FileLogger\n")
