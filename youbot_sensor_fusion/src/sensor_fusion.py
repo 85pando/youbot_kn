@@ -117,7 +117,6 @@ class PointCloudCreator:
   def executeIcp(self):
     if (not self.frontReady) and (not self.rightReady) and (not self.leftReady) and (not self.kinectReady):
       # there is a cloud that is not yet ready
-      #print("Not all ready")
       return None
     # all clouds are ready, reset check values
     self.resetICPCheckValues()
@@ -126,8 +125,7 @@ class PointCloudCreator:
     if not path.isfile(self.laserICPyamlPath):
       print("Creating ICP-configfile")
       self.createLaserICPConfig()
-      
-    print("Executing ICP")
+    
     # change into /tmp/ so that result is in the expected place
     chdir("/tmp/")
     frontCloud = self.frontCloud
@@ -136,12 +134,10 @@ class PointCloudCreator:
     # TODO execute ICP front <-> right
     subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
                      self.frontCloudPath, self.rightCloudPath],
-                     stdout=self.devnull)
+                     stdout=self.devnull,stderr=self.devnull)
 
     # extract new rightCloud from vtk-file
     rightCloud = extractPoints(self.icpResultPath)
-    print(rightCloud)
-    return None
     
     # execute ICP front <-> left, FIXME uncomment this, when second laser present
     #subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
@@ -180,11 +176,10 @@ class PointCloudCreator:
   def writePointCloudToFile(self, fileName, pointCloud):
     f = open(fileName, 'w')
     outwriter = csv.writer(f)
-    # print header
+    # write header
     outwriter.writerow(["x", "y", "z"])
     outwriter.writerows(pointCloud)
     f.close()
-    #print("====== wrote", fileName, len(pointCloud), "======")
     return None
 
   def publishPointCloud(self,pointCloud):
