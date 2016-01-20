@@ -8,10 +8,10 @@
 <param name="hokuyo_node_right/port" value="/dev/sensors/hokuyo_right" />
 
 <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_front">
-	<param name="frame_id" value="base_laser_front_link" />
+	<param name="frame_id" value="front_laser" />
 </node>
 <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_right">
-	<param name="frame_id" value="base_laser_front_link" />
+	<param name="frame_id" value="right_laser" />
 	<remap from="scan" to="scan_right" />
 </node>
 
