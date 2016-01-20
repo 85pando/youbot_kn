@@ -61,6 +61,7 @@ class PointCloudCreator:
     # publisher
     self.cloudPublisher = cloudPublisher
     self.seq = 0
+    self.frame_id = "/sensor_cloud"
     return None
 
 
@@ -202,12 +203,15 @@ class PointCloudCreator:
     pc2cloud.header.seq = self.seq
     self.seq = self.seq + 1
     # TODO include correct time stamp
-      # TODO how do we get the correct timestamp anyways?
-    # TODO inset correct frame_id here
+    timestamp = rospy.get_rostime()
+    #timestamp = rospy.now()
+    pc2cloud.header.stamp.secs  = timestamp.secs
+    pc2cloud.header.stamp.nsecs = timestamp.nsecs
+    # insert correct frame_id here
+    pc2cloud.header.frame_id = self.frame_id
     # actually publish the pointcloud
     self.cloudPublisher.publish(pc2cloud)
     return None
-    
 
   def relocatePointCloud(self, pointCloud, rotation, translation):
     """

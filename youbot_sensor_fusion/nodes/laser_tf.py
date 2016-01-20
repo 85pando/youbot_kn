@@ -19,7 +19,7 @@ import tf
 
 # default python boilerplate
 if __name__ == '__main__':
-  rospy.init_node('laserCloud_tf_broadcaster')
+  rospy.init_node('laser_frame_broadcaster')
   br   = tf.TransformBroadcaster()
   rate = rospy.Rate(10.0)
   
@@ -30,24 +30,24 @@ if __name__ == '__main__':
                      (0.0, 0.0, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
                      "sensor_cloud", # new frame
-                     "base_link")   # parent
+                     "base_link")    # parent
     # front laser FIXME correct values when sensors are correctly attached
     br.sendTransform((0.0, 0.22, 0.0), # translation x,y,z
                      (0.0, 0.00, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
-                     "front_laser", # new frame
+                     "front_laser",    # new frame
                      "sensor_cloud")   # parent
     # right laser FIXME correct values when sensors are correctly attached
     br.sendTransform((0.11, 0.0, 0.0), # translation x,y,z
                      (0.00, 0.0, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
-                     "right_laser", # new frame
+                     "right_laser",    # new frame
                      "sensor_cloud")   # parent
     # left laser FIXME correct values when sensors are correctly attached
     br.sendTransform((-0.11, 0.0, 0.0), # translation x,y,z
                      ( 0.00, 0.0, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
-                     "left_laser", # new frame
+                     "left_laser",     # new frame
                      "sensor_cloud")   # parent
     rate.sleep()
     
