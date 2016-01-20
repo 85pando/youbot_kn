@@ -115,6 +115,9 @@ class PointCloudCreator:
 
 
   def executeIcp(self):
+    """
+    Executes icp via the pmicp programm from libpointmatcher. Publishes the result to topic "/sensor_cloud" and does not store it any further.
+    """
     if (not self.frontReady) and (not self.rightReady) and (not self.leftReady) and (not self.kinectReady):
       # there is a cloud that is not yet ready
       return None
@@ -131,7 +134,7 @@ class PointCloudCreator:
     frontCloud = self.frontCloud
     
     
-    # TODO execute ICP front <-> right
+    # execute ICP front <-> right
     subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
                      self.frontCloudPath, self.rightCloudPath],
                      stdout=self.devnull,stderr=self.devnull)
@@ -174,6 +177,11 @@ class PointCloudCreator:
 
 
   def writePointCloudToFile(self, fileName, pointCloud):
+    """
+    Writes a given pointCloud to a given fileName.
+    :fileName The file name to write to.
+    :pointCloud The pointCloud that will be written to file.
+    """
     f = open(fileName, 'w')
     outwriter = csv.writer(f)
     # write header
@@ -183,6 +191,10 @@ class PointCloudCreator:
     return None
 
   def publishPointCloud(self,pointCloud):
+    """
+    Publishes the given pointCloud to the topic "/sensor_cloud" as PoinCloud2 message.
+    :pointCloud The pointCloud to be published.
+    """
     # create variable of pc2 type
     pc2cloud = PointCloud2()
     # convert existing pointCloud into correct format
@@ -291,6 +303,9 @@ class PointCloudCreator:
     return cloudPoints
 
   def createLaserICPConfig(self):
+    """
+    Creates the config file needed for the pmip executable to do ICP. Writes this to self.laserICPyamlPath, where it will be read from.
+    """
     f = open(self.laserICPyamlPath, 'w')
     f.write("readingDataPointsFilters:\n")
     f.write("  - SurfaceNormalDataPointsFilter:\n")
