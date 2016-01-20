@@ -29,25 +29,25 @@ if __name__ == '__main__':
     br.sendTransform((0.0, 0.0, 0.0), # translation x,y,z
                      (0.0, 0.0, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
-                     "laser_cloud", # new frame
+                     "sensor_cloud", # new frame
                      "base_link")   # parent
     # front laser FIXME correct values when sensors are correctly attached
     br.sendTransform((0.0, 0.22, 0.0), # translation x,y,z
                      (0.0, 0.00, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
                      "front_laser", # new frame
-                     "laser_cloud")   # parent
+                     "sensor_cloud")   # parent
     # right laser FIXME correct values when sensors are correctly attached
     br.sendTransform((0.11, 0.0, 0.0), # translation x,y,z
                      (0.00, 0.0, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
                      "right_laser", # new frame
-                     "laser_cloud")   # parent
+                     "sensor_cloud")   # parent
     # left laser FIXME correct values when sensors are correctly attached
     br.sendTransform((-0.11, 0.0, 0.0), # translation x,y,z
                      ( 0.00, 0.0, 0.0, 1.0), # rotation x,y,z,w
                      rospy.Time.now(),
                      "left_laser", # new frame
-                     "laser_cloud")   # parent
+                     "sensor_cloud")   # parent
     rate.sleep()
     
