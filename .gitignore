@@ -1,4 +1,7 @@
 
+# ignore archives
+
+*.tar.gz
 
 # Created by https://www.gitignore.io
 

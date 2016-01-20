@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  tf
 )
 find_package(libpointmatcher 1.1.0 REQUIRED)
 
@@ -110,7 +111,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES youbot_sensor_fusion
 #  CATKIN_DEPENDS pcl_conversions pcl_ros roscpp rospy sensor_msgs
-#  geometry_msgs std_msgs
+#  geometry_msgs std_msgs tf
 #  DEPENDS system_lib
 )
 

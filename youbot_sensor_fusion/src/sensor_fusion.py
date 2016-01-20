@@ -3,7 +3,7 @@
 """
 This script will take the data of LaserScans and create a point clouds out of it.
 
-Copyright (C) 2015 Stephan Heidinger
+Copyright (C) 2015-2016 Stephan Heidinger
 stephan.heidinger@uni-konstanz.de
 
 This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License.
