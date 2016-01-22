@@ -12,10 +12,11 @@ See the full license text here: https://creativecommons.org/licenses/by-sa/3.0/l
 """
 
 import roslib
-roslib.load_manifest('youbot_sensor_fusion')
+roslib.load_manifest('youbot_teleop_interrupt')
 
 import rospy
 import tf
+from math import pi
 
 # default python boilerplate
 if __name__ == '__main__':
@@ -26,26 +27,28 @@ if __name__ == '__main__':
   while not rospy.is_shutdown():
     # the combined cloud is at the center of the robot.
     # lengths in the transform are in m
+    # rotations are in radian
     br.sendTransform((0.0, 0.0, 0.0), # translation x,y,z
-                     (0.0, 0.0, 0.0, 1.0), # rotation x,y,z,w
+                     tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0), # rotation x,y,z,w
                      rospy.Time.now(),
                      "sensor_cloud", # new frame
                      "base_link")    # parent
     # front laser FIXME correct values when sensors are correctly attached
-    br.sendTransform((0.0, 0.22, 0.0), # translation x,y,z
-                     (0.0, 0.00, 0.0, 1.0), # rotation x,y,z,w
+    #quat = quaternion_from_euler(0.0, 0.0, pi/2)
+    br.sendTransform((0.22, 0.0, 0.0), # translation x,y,z
+                     tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
                      rospy.Time.now(),
                      "front_laser",    # new frame
                      "sensor_cloud")   # parent
     # right laser FIXME correct values when sensors are correctly attached
-    br.sendTransform((0.11, 0.0, 0.0), # translation x,y,z
-                     (0.00, 0.0, 0.0, 1.0), # rotation x,y,z,w
+    br.sendTransform((0.0, -0.11, 0.0), # translation x,y,z
+                     tf.transformations.quaternion_from_euler(0.0, 0.0, -pi/2), # rotation x,y,z,w
                      rospy.Time.now(),
                      "right_laser",    # new frame
                      "sensor_cloud")   # parent
     # left laser FIXME correct values when sensors are correctly attached
-    br.sendTransform((-0.11, 0.0, 0.0), # translation x,y,z
-                     ( 0.00, 0.0, 0.0, 1.0), # rotation x,y,z,w
+    br.sendTransform((0.0, 0.11, 0.0), # translation x,y,z
+                     tf.transformations.quaternion_from_euler(0.0, 0.0, pi/2), # rotation x,y,z,w
                      rospy.Time.now(),
                      "left_laser",     # new frame
                      "sensor_cloud")   # parent
