@@ -61,7 +61,7 @@ class PointCloudCreator:
     # publisher
     self.cloudPublisher = cloudPublisher
     self.seq = 0
-    self.frame_id = "/sensor_cloud"
+    self.frame_id = "/sensor_cloud_frame"
     return None
 
 
@@ -168,7 +168,7 @@ class PointCloudCreator:
     kinectCloud = [] # extractPoints(self.icpResultPath)
     
     # combine finalCloud = laserCloud + kinectCloud
-    finalCloud = laserCloud = kinectCloud
+    finalCloud = laserCloud + kinectCloud
     del laserCloud
     del kinectCloud
     

@@ -41,7 +41,7 @@ if __name__ == '__main__':
   rate = rospy.Rate(10.0)
   
   # variables for locations of the sensors
-  sensorC = Displacement()
+  sensorC = Displacement(zrot=-pi/2)
   frontL  = Displacement(x=.22)
   rightL  = Displacement(y=-.11, zrot=-pi/2)
   leftL   = Displacement(y= .11, zrot= pi/2)
@@ -69,7 +69,7 @@ if __name__ == '__main__':
                     frontL.getRotationQuat(),
                     rospy.Time.now(),
                     "front_laser",    # new frame
-                    "sensor_cloud_frame")   # parent
+                    "base_link")   # parent
     # right laser FIXME correct values when sensors are correctly attached
     br.sendTransform(
                     #(0.0, -0.11, 0.0), # translation x,y,z
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                     rightL.getRotationQuat(),
                     rospy.Time.now(),
                     "right_laser",    # new frame
-                    "sensor_cloud_frame")   # parent
+                    "base_link")   # parent
     # left laser FIXME correct values when sensors are correctly attached
     br.sendTransform(
                     #(0.0, 0.11, 0.0), # translation x,y,z
@@ -87,6 +87,6 @@ if __name__ == '__main__':
                     leftL.getRotationQuat(),
                     rospy.Time.now(),
                     "left_laser",     # new frame
-                    "sensor_cloud_frame")   # parent
+                    "base_link")   # parent
     rate.sleep()
     
