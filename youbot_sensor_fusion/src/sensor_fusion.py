@@ -98,7 +98,7 @@ class PointCloudCreator:
     del rightCloud
     self.writePointCloudToFile(self.rightCloudPath, self.rightCloud)
     # don't need to save rightCloud, this will come from the ICP result
-    self.rightReady
+    self.rightReady = True
     self.executeIcp
     return None
 
@@ -119,11 +119,13 @@ class PointCloudCreator:
     """
     Executes icp via the pmicp programm from libpointmatcher. Publishes the result to topic "/sensor_cloud" and does not store it any further.
     """
-    if (not self.frontReady) and (not self.rightReady) and (not self.leftReady) and (not self.kinectReady):
+    if (not self.frontReady) or (not self.rightReady) or (not self.leftReady) or (not self.kinectReady):
       # there is a cloud that is not yet ready
       return None
     # all clouds are ready, reset check values
     self.resetICPCheckValues()
+    #take timestamp, because measurement was from here
+    timestamp = rospy.get_rostime()
     
     # create config file for ICP if it does not exist
     if not path.isfile(self.laserICPyamlPath):
@@ -172,7 +174,9 @@ class PointCloudCreator:
     del laserCloud
     del kinectCloud
     
-    self.publishPointCloud(finalCloud)
+    #self.writePointCloudToFile("/tmp/icpResult.csv", finalCloud)
+    
+    self.publishPointCloud(finalCloud, timestamp)
     return None
 
 
@@ -191,7 +195,8 @@ class PointCloudCreator:
     f.close()
     return None
 
-  def publishPointCloud(self,pointCloud):
+
+  def publishPointCloud(self, pointCloud, timestamp):
     """
     Publishes the given pointCloud to the topic "/sensor_cloud" as PoinCloud2 message.
     :pointCloud The pointCloud to be published.
@@ -202,9 +207,6 @@ class PointCloudCreator:
     pc2cloud = pc2.create_cloud_xyz32(pc2cloud.header, pointCloud)
     pc2cloud.header.seq = self.seq
     self.seq = self.seq + 1
-    # TODO include correct time stamp
-    timestamp = rospy.get_rostime()
-    #timestamp = rospy.now()
     pc2cloud.header.stamp.secs  = timestamp.secs
     pc2cloud.header.stamp.nsecs = timestamp.nsecs
     # insert correct frame_id here
@@ -212,6 +214,7 @@ class PointCloudCreator:
     # actually publish the pointcloud
     self.cloudPublisher.publish(pc2cloud)
     return None
+
 
   def relocatePointCloud(self, pointCloud, rotation, translation):
     """
