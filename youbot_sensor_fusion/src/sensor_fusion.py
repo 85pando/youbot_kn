@@ -47,6 +47,12 @@ class PointCloudCreator:
     self.leftTranslation  = (-.110,0)
     self.leftHeight       = .001
     
+    # timestamps
+    self.frontTimestamp  = rospy.Time()
+    self.rightTimestamp  = rospy.Time()
+    self.leftTimestamp   = rospy.Time()
+    self.kinectTimestamp = rospy.Time()
+    
     # values for ICP stuff
     self.resetICPCheckValues() # this sets the ready values
     self.laserICPyamlPath = '/tmp/laserICP.yaml'
@@ -72,13 +78,15 @@ class PointCloudCreator:
     :return A PointCloud with coordinates relative to the center of the robot.
     """
     frontCloud = self.convertLaserScanToPointCloud(frontLaser, self.frontHeight)
-    frontCloud = self.relocatePointCloud(frontCloud,
+    self.frontCloud = self.relocatePointCloud(frontCloud,
                                               self.frontRotation,
                                               self.frontTranslation
                                               )
-    self.writePointCloudToFile(self.frontCloudPath, frontCloud)
-    self.frontCloud = frontCloud
+    del frontCloud
+    self.writePointCloudToFile(self.frontCloudPath, self.frontCloud)
     # frontCloud can now be processed
+    self.frontTimestamp.secs  = frontLaser.header.stamp.secs
+    self.frontTimestamp.nsecs = frontLaser.header.stamp.nsecs
     self.frontReady = True
     self.executeIcp()
     return None
@@ -98,6 +106,8 @@ class PointCloudCreator:
     del rightCloud
     self.writePointCloudToFile(self.rightCloudPath, self.rightCloud)
     # don't need to save rightCloud, this will come from the ICP result
+    self.rightTimestamp.secs  = rightLaser.header.stamp.secs
+    self.rightTimestamp.nsecs = rightLaser.header.stamp.nsecs
     self.rightReady = True
     self.executeIcp
     return None
@@ -124,8 +134,21 @@ class PointCloudCreator:
       return None
     # all clouds are ready, reset check values
     self.resetICPCheckValues()
-    #take timestamp, because measurement was from here
-    timestamp = rospy.get_rostime()
+    #decide what the timestamp should be #FIXME probably take the kinect timestamp here, as this is probably the one with the lowest frequency
+    timestamp = rospy.Time()
+    if (self.frontTimestamp.secs == self.rightTimestamp.secs):
+      # when all timestamps are in the same second, check the nanoseconds
+      # TODO when more sensors, check if there is one oldest
+      if (self.frontTimestamp.nsecs < self.rightTimestamp.nsecs):
+        timestamp = self.frontTimestamp
+      else:
+        timestamp = self.rightTimestamp
+    else:
+      # if not all timestamps in the same second, take the oldest
+      if (self.frontTimestamp.secs < self.rightTimestamp.secs):
+        timestamp = self.frontTimestamp
+      else:
+        timestamp = self.rightTimestamp
     
     # create config file for ICP if it does not exist
     if not path.isfile(self.laserICPyamlPath):
