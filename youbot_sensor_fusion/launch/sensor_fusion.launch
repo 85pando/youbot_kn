@@ -1,6 +1,7 @@
 <launch>
 
     <node pkg="youbot_sensor_fusion" type="sensor_fusion.py" name="sensor_fusion" output="log"/>
+  <!-- <node pkg="youbot_sensor_fusion" type="sensor_fusion_wo_icp.py" name="sensor_fusion" output="log"/> -->
 
 </launch>
 
