@@ -48,7 +48,7 @@ class PointCloudCreator:
     self.leftHeight       = .001
     
     # values for ICP stuff
-    self.resetICPCheckValues()
+    self.resetICPCheckValues() # this sets the ready values
     self.laserICPyamlPath = '/tmp/laserICP.yaml'
     self.frontCloudPath   = '/tmp/frontCloud.csv'
     self.rightCloudPath   = '/tmp/rightCloud.csv'
@@ -308,6 +308,7 @@ class PointCloudCreator:
         # put into output array
         cloudPoints.append( [xCoord,yCoord,zCoord] )
     return cloudPoints
+
 
   def createLaserICPConfig(self):
     """

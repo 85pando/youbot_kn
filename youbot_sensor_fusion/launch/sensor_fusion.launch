@@ -1,7 +1,6 @@
 <launch>
 
-    <!-- <node pkg="youbot_sensor_fusion" type="laser_tf.py" name="laser_frame_broadcaster" /> -->
-    <node pkg="youbot_sensor_fusion" type="sensor_fusion.py" name="sensor_fusion" output="screen"/>
+    <node pkg="youbot_sensor_fusion" type="sensor_fusion.py" name="sensor_fusion" output="log"/>
 
 </launch>
 
