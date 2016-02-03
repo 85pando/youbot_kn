@@ -45,6 +45,7 @@ if __name__ == '__main__':
   frontL  = Displacement(x=.22)
   rightL  = Displacement(y=-.11, zrot=-pi/2)
   leftL   = Displacement(y= .11, zrot= pi/2)
+  camera  = Displacement(x= .195, z= .145)
   # end variables for locations of the sensors
   
   
@@ -78,5 +79,19 @@ if __name__ == '__main__':
                     )
     # left laser FIXME correct values when sensors are correctly attached
     br.sendTransform(
+                    leftL.getTranslation(),     # translation
+                    leftL.getRotationQuat(),    # rotation
+                    rospy.Time.now(),           # timestamp
+                    "left_laser",               # new frame
+                    "base_link",                # parent
+                    )
+    # kinect like camera FIXME correct values when camera is correctly attached
+    br.sendTransform(
+                    camera.getTranslation(),    # translation
+                    camera.getRotationQuat(),   # rotation
+                    rospy.Time.now(),           # timestamp
+                    "depth-camera",             # new frame
+                    # FIXME parent should be the correct arm link which the camera will be attached to
+                    "base_link",                # parent
+                    )
     rate.sleep()
-    
