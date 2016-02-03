@@ -53,40 +53,30 @@ if __name__ == '__main__':
     # lengths in the transform are in m
     # rotations are in radian
     br.sendTransform(
-                    #(0.0, 0.0, 0.0), # translation x,y,z
-                    sensorC.getTranslation(),
-                    #tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0), # rotation x,y,z,w
-                    sensorC.getRotationQuat(),
-                    rospy.Time.now(),
-                    "sensor_cloud_frame", # new frame
-                    "base_link")    # parent
+                    sensorC.getTranslation(),   # translation
+                    sensorC.getRotationQuat(),  # rotation
+                    rospy.Time.now(),           # timestamp
+                    "sensor_cloud_frame",       # new frame
+                    "base_link",                # parent
+                    )
     # front laser FIXME correct values when sensors are correctly attached
     #quat = quaternion_from_euler(0.0, 0.0, pi/2)
     br.sendTransform(
-                    #(0.22, 0.0, 0.0), # translation x,y,z
-                    frontL.getTranslation(),
-                    #tf.transformations.quaternion_from_euler(0.0, 0.0, 0.0),
-                    frontL.getRotationQuat(),
-                    rospy.Time.now(),
-                    "front_laser",    # new frame
-                    "base_link")   # parent
+                    frontL.getTranslation(),    # translation
+                    frontL.getRotationQuat(),   # rotation
+                    rospy.Time.now(),           # timestamp
+                    "front_laser",              # new frame
+                    "base_link",                # parent
+                    )
     # right laser FIXME correct values when sensors are correctly attached
     br.sendTransform(
-                    #(0.0, -0.11, 0.0), # translation x,y,z
-                    rightL.getTranslation(),
-                    #tf.transformations.quaternion_from_euler(0.0, 0.0, -pi/2), # rotation x,y,z,w
-                    rightL.getRotationQuat(),
-                    rospy.Time.now(),
-                    "right_laser",    # new frame
-                    "base_link")   # parent
+                    rightL.getTranslation(),    # translation
+                    rightL.getRotationQuat(),   # rotation
+                    rospy.Time.now(),           # timestamp
+                    "right_laser",              # new frame
+                    "base_link",                # parent
+                    )
     # left laser FIXME correct values when sensors are correctly attached
     br.sendTransform(
-                    #(0.0, 0.11, 0.0), # translation x,y,z
-                    leftL.getTranslation(),
-                    #tf.transformations.quaternion_from_euler(0.0, 0.0, pi/2), # rotation x,y,z,w
-                    leftL.getRotationQuat(),
-                    rospy.Time.now(),
-                    "left_laser",     # new frame
-                    "base_link")   # parent
     rate.sleep()
     
