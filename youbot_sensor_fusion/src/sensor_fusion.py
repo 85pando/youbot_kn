@@ -55,6 +55,7 @@ class PointCloudCreator:
     
     # values for ICP stuff
     self.resetICPCheckValues() # this sets the ready values
+    self.ICPReady         = True
     self.laserICPyamlPath = '/tmp/laserICP.yaml'
     self.frontCloudPath   = '/tmp/frontCloud.csv'
     self.rightCloudPath   = '/tmp/rightCloud.csv'
@@ -113,6 +114,36 @@ class PointCloudCreator:
     return None
 
 
+  def receiveDepthImage(self, depthImage):
+    """
+    The depth camera has sent a new scan. If the last scan has been processed, hand pointCloud over to icp.
+    :param depthImage: A pointCloud2 as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html
+    """
+    if not self.ICPReady:
+      #rospy.loginfo("depthImage dropped")
+      print("depthImage dropped")
+      return None
+    self.ICPReady = False
+    # write header
+    #outwriter.writerow(["x", "y", "z"])
+    outtext = ["xyz"]
+    points = pc2.read_points(depthImage, skip_nans=True, field_names=("x", "y", "z"))
+    while True: # Stop this loop, when writing rows no longer possible
+      try:
+        #outwriter.writerow(next(points))
+        outtext.append(next(points))
+      except StopIteration:
+        break
+      
+      
+    f = open(self.kinectCloudPath, 'w')
+    outwriter = csv.writer(f)
+    outwriter.writerows(outtext)
+    f.close()
+    self.kinectReady = True
+    self.executeIcp()
+    return None
+
   def resetICPCheckValues(self):
     """
     Resets some values, so that we know when we can execute the next icp
@@ -121,7 +152,7 @@ class PointCloudCreator:
     self.rightReady  = False
     # those sensors are not yet present, so we need not wait for them
     self.leftReady   = True
-    self.kinectReady = True
+    self.kinectReady = False
     return None
 
 
@@ -173,7 +204,7 @@ class PointCloudCreator:
     #                 self.frontCloudPath, self.leftCloudPath],
     #                 stdout=self.devnull)
     # extract new leftCloud from vtk-file, FIXME use comment, as soon as left laser present
-    leftCloud = [] # extractPoints(self.icpResultPath)
+    leftCloud = [] # leftCloud = extractPoints(self.icpResultPath)
     
     # combine frontCloud + rightCloud
     frontRightCloud = frontCloud + rightCloud
@@ -185,12 +216,12 @@ class PointCloudCreator:
     del leftCloud
     
     # execute ICP laserCloud <-> kinectCloud, FIXME uncomment this, when kinect present
-    #subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
-    #                 self.kinectCloudPath, self.rightCloudPath],
-    #                 stdout=self.devnull)
-    #
-    # extract new kinectCloud from vtk-file, FIXME use comment as soon as kinect present
-    kinectCloud = [] # extractPoints(self.icpResultPath)
+    subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
+                     #self.kinectCloudPath, self.rightCloudPath],
+                     self.frontCloudPath, self.rightCloudPath],
+                     stdout=self.devnull)
+    # extract new kinectCloud from vtk-file,  use comment as soon as kinect present
+    kinectCloud = extractPoints(self.icpResultPath)
     
     # combine finalCloud = laserCloud + kinectCloud
     finalCloud = laserCloud + kinectCloud
@@ -200,6 +231,7 @@ class PointCloudCreator:
     #self.writePointCloudToFile("/tmp/icpResult.csv", finalCloud)
     
     self.publishPointCloud(finalCloud, timestamp)
+    self.ICPReady = True
     return None
 
 
@@ -398,5 +430,6 @@ if __name__ == "__main__":
   # want to receive messages from laser scanner
   rospy.Subscriber('/scan', LaserScan, cloudCreator.receiveFrontLaser)
   rospy.Subscriber('/scan_right', LaserScan, cloudCreator.receiveRightLaser)
+  rospy.Subscriber('/camera/depth/points', PointCloud2, cloudCreator.receiveDepthImage)
   # keep alive
   rospy.spin()
