@@ -42,9 +42,13 @@ if __name__ == '__main__':
   
   # variables for locations of the sensors
   sensorC = Displacement(zrot=-pi/2)
+  # FIXME correct values when sensors are correctly attached
   frontL  = Displacement(x=.22)
+  # FIXME correct values when sensors are correctly attached
   rightL  = Displacement(y=-.11, zrot=-pi/2)
+  # FIXME correct values when sensors are correctly attached
   leftL   = Displacement(y= .11, zrot= pi/2)
+  # FIXME correct values when sensors are correctly attached
   camera  = Displacement(x= .195, z= .145)
   # end variables for locations of the sensors
   
@@ -60,7 +64,7 @@ if __name__ == '__main__':
                     "sensor_cloud_frame",       # new frame
                     "base_link",                # parent
                     )
-    # front laser FIXME correct values when sensors are correctly attached
+    # front laser
     #quat = quaternion_from_euler(0.0, 0.0, pi/2)
     br.sendTransform(
                     frontL.getTranslation(),    # translation
@@ -69,7 +73,7 @@ if __name__ == '__main__':
                     "front_laser_link",         # new frame
                     "base_link",                # parent
                     )
-    # right laser FIXME correct values when sensors are correctly attached
+    # right laser
     br.sendTransform(
                     rightL.getTranslation(),    # translation
                     rightL.getRotationQuat(),   # rotation
@@ -77,7 +81,7 @@ if __name__ == '__main__':
                     "right_laser_link",         # new frame
                     "base_link",                # parent
                     )
-    # left laser FIXME correct values when sensors are correctly attached
+    # left laser
     br.sendTransform(
                     leftL.getTranslation(),     # translation
                     leftL.getRotationQuat(),    # rotation
@@ -85,7 +89,7 @@ if __name__ == '__main__':
                     "left_laser_link",          # new frame
                     "base_link",                # parent
                     )
-    # kinect like camera FIXME correct values when camera is correctly attached
+    # depth camera
     br.sendTransform(
                     camera.getTranslation(),    # translation
                     camera.getRotationQuat(),   # rotation
