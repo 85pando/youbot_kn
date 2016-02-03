@@ -66,7 +66,7 @@ if __name__ == '__main__':
                     frontL.getTranslation(),    # translation
                     frontL.getRotationQuat(),   # rotation
                     rospy.Time.now(),           # timestamp
-                    "front_laser",              # new frame
+                    "front_laser_link",         # new frame
                     "base_link",                # parent
                     )
     # right laser FIXME correct values when sensors are correctly attached
@@ -74,7 +74,7 @@ if __name__ == '__main__':
                     rightL.getTranslation(),    # translation
                     rightL.getRotationQuat(),   # rotation
                     rospy.Time.now(),           # timestamp
-                    "right_laser",              # new frame
+                    "right_laser_link",         # new frame
                     "base_link",                # parent
                     )
     # left laser FIXME correct values when sensors are correctly attached
@@ -82,7 +82,7 @@ if __name__ == '__main__':
                     leftL.getTranslation(),     # translation
                     leftL.getRotationQuat(),    # rotation
                     rospy.Time.now(),           # timestamp
-                    "left_laser",               # new frame
+                    "left_laser_link",          # new frame
                     "base_link",                # parent
                     )
     # kinect like camera FIXME correct values when camera is correctly attached
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                     camera.getTranslation(),    # translation
                     camera.getRotationQuat(),   # rotation
                     rospy.Time.now(),           # timestamp
-                    "depth-camera",             # new frame
+                    "camera_link",              # new frame
                     # FIXME parent should be the correct arm link which the camera will be attached to
                     "base_link",                # parent
                     )
