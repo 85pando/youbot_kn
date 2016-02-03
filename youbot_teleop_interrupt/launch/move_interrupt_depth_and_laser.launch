@@ -1,0 +1,33 @@
+<launch>
+
+    <include file="$(find youbot_driver_ros_interface)/launch/youbot_driver.launch" />
+
+    <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_front">
+        <param name="port" type="string" value="/dev/sensors/hokuyo_front" />
+        <param name="frame_id" value="front_laser_link" />
+    </node>
+    <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_right">
+        <param name="port" type="string" value="/dev/sensors/hokuyo_right" />
+        <param name="frame_id" value="right_laser_link" />
+        <remap from="scan" to="scan_right" />
+    </node>
+    <!--
+    <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo_node_left">
+        <param name="port" type="string" value="/dev/sensors/hokuyo_left" />
+        <param name="frame_id" value="left_laser_link" />
+        <remap from="scan" to="scan_left" />
+    </node>
+    -->
+    <include file="$(find youbot_teleop_interrupt)/launch/openni2-youbot.launch" />
+
+    <node pkg="youbot_teleop_interrupt" type="laser_tf.py" name="laser_frame_broadcaster" />
+    <node pkg="youbot_teleop_interrupt" type="move_interrupt.py" name="move_interrupt" output="screen" />
+
+    <node pkg="gmapping" type="slam_gmapping" name="gmapping_thing" output="log" >
+      <param name="scan" value="scan" />
+      <param name="_odom_frame" value="odom" />
+      <param name="_base_frame" value="base_link" />
+    </node>
+
+</launch>
+
