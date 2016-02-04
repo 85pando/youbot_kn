@@ -69,6 +69,8 @@ class PointCloudCreator:
     self.cloudPublisher = cloudPublisher
     self.seq = 0
     self.frame_id = "/sensor_cloud_frame"
+  
+    ## all inits done
     return None
 
 
@@ -76,7 +78,6 @@ class PointCloudCreator:
     """
     The front LaserScanner has sent a new scan. Create a point cloud.
     :param frontLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
-    :return A PointCloud with coordinates relative to the center of the robot.
     """
     frontCloud = self.convertLaserScanToPointCloud(frontLaser, self.frontHeight)
     self.frontCloud = self.relocatePointCloud(frontCloud,
@@ -97,7 +98,6 @@ class PointCloudCreator:
     """
     The right LaserScanner has sent a new scan. Create a point cloud.
     :param rightLaser: A laserScan as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html
-    :return A PointCloud with coordinates relative to the center of the robot.
     """
     rightCloud = self.convertLaserScanToPointCloud(rightLaser, self.rightHeight)
     self.rightCloud = self.relocatePointCloud(rightCloud,
@@ -183,7 +183,7 @@ class PointCloudCreator:
     
     # create config file for ICP if it does not exist
     if not path.isfile(self.laserICPyamlPath):
-      print("Creating ICP-configfile")
+      rospy.loginfo("Creating ICP-configfile")
       self.createLaserICPConfig()
     
     # change into /tmp/ so that result is in the expected place
