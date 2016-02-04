@@ -64,6 +64,7 @@ class PointCloudCreator:
     self.icpResultDir     = '/tmp/'
     self.icpResultPath    = '/tmp/test_data_out.vtk'
     self.devnull          = open(devnull, 'w')
+    self.kinectICPyamlPath = '/tmp/kinectICP.yaml'
     
     # publisher
     self.cloudPublisher = cloudPublisher
@@ -125,21 +126,14 @@ class PointCloudCreator:
       return None
     self.ICPReady = False
     # write header
-    #outwriter.writerow(["x", "y", "z"])
-    outtext = ["xyz"]
+    outtext = []
     points = pc2.read_points(depthImage, skip_nans=True, field_names=("x", "y", "z"))
     while True: # Stop this loop, when writing rows no longer possible
       try:
-        #outwriter.writerow(next(points))
         outtext.append(next(points))
       except StopIteration:
         break
-      
-      
-    f = open(self.kinectCloudPath, 'w')
-    outwriter = csv.writer(f)
-    outwriter.writerows(outtext)
-    f.close()
+    self.writePointCloudToFile(self.kinectCloudPath, outtext)
     self.kinectReady = True
     self.executeIcp()
     return None
@@ -183,8 +177,11 @@ class PointCloudCreator:
     
     # create config file for ICP if it does not exist
     if not path.isfile(self.laserICPyamlPath):
-      rospy.loginfo("Creating ICP-configfile")
+      rospy.loginfo("Creating ICP-configfile for laser.")
       self.createLaserICPConfig()
+    if not path.isfile(self.kinectICPyamlPath):
+      rospy.loginfo("Creating ICP-configfile for kinect.")
+      self.createKinectICPConfig()
     
     # change into /tmp/ so that result is in the expected place
     chdir("/tmp/")
@@ -194,7 +191,8 @@ class PointCloudCreator:
     # execute ICP front <-> right
     subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
                      self.frontCloudPath, self.rightCloudPath],
-                     stdout=self.devnull,stderr=self.devnull)
+                     stdout=self.devnull,stderr=self.devnull,
+                     )
 
     # extract new rightCloud from vtk-file
     rightCloud = extractPoints(self.icpResultPath)
@@ -216,10 +214,11 @@ class PointCloudCreator:
     del leftCloud
     
     # execute ICP laserCloud <-> kinectCloud, FIXME uncomment this, when kinect present
-    subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
+    subprocess.call(['pmicp', '--config', self.kinectICPyamlPath,
                      #self.kinectCloudPath, self.rightCloudPath],
-                     self.frontCloudPath, self.rightCloudPath],
-                     stdout=self.devnull)
+                     self.frontCloudPath, self.kinectCloudPath],
+                     #stdout=self.devnull,stderr=self.devnull,
+                     )
     # extract new kinectCloud from vtk-file,  use comment as soon as kinect present
     kinectCloud = extractPoints(self.icpResultPath)
     
@@ -407,6 +406,53 @@ class PointCloudCreator:
 
     f.close()
 
+  def createKinectICPConfig(self):
+    """
+    Creates the config file needed for the pmip executable to do ICP. Writes this to self.kinectICPyamlPath, where it will be read from.
+    """
+    f = open(self.kinectICPyamlPath, 'w')
+    f.write("readingDataPointsFilters:\n")
+    #f.write("  - SurfaceNormalDataPointsFilter:\n")
+    #f.write("      knn: 10\n")
+    f.write("  - RandomSamplingDataPointsFilter:\n")
+    f.write("      prob: 0.5\n")
+    f.write("\n")
+    f.write("referenceDataPointsFilters:\n")
+    f.write("  - SurfaceNormalDataPointsFilter:\n")
+    f.write("      knn: 10\n")
+    #f.write("  - RandomSamplingDataPointsFilter:\n")
+    #f.write("      prob: 0.5\n")
+    f.write("\n")
+    
+    f.write("\n")
+    f.write("matcher:\n")
+    f.write("  KDTreeMatcher:\n")
+    f.write("    knn: 1\n")
+    f.write("    epsilon: 0\n")
+    f.write("    maxDist: 0.25\n")
+    f.write("\n")
+    #f.write("outlierFilters:\n")
+    #f.write("  - TrimmedDistOutlierFilter:\n")
+    #f.write("      ratio: 0.85\n")
+    #f.write("\n")
+    f.write("errorMinimizer:\n")
+    f.write("  PointToPointErrorMinimizer\n")
+    f.write("\n")
+    f.write("transformationCheckers:\n")
+    f.write("  - CounterTransformationChecker:\n")
+    f.write("      maxIterationCount: 40\n")
+    f.write("  - DifferentialTransformationChecker:\n")
+    f.write("      minDiffRotErr: 0.001\n")
+    f.write("      minDiffTransErr: 0.01\n")
+    f.write("      smoothLength: 4\n")
+    f.write("\n")
+    f.write("inspector:\n")
+    f.write("  VTKFileInspector\n")
+    f.write("\n")
+    f.write("logger:\n")
+    f.write("  FileLogger\n")
+
+    f.close()
 
 class InvalidRotationException(Exception):
   def __init__(self, angle):
