@@ -34,18 +34,23 @@ class PointCloudCreator:
   def __init__(self, cloudPublisher):
     # lengths are in m
     # rotations are in degree
-    self.frontRotation    = 0
-    self.frontTranslation = (0,.220)
-    self.frontHeight      = .001
-    self.rightRotation    = 90
-    self.rightTranslation = (.110,0)
-    self.rightHeight      = .001
-    self.backRotation     = 180
-    self.backTranslation  = (0,-.220)
-    self.backHeight       = .001
-    self.leftRotation     = 270
-    self.leftTranslation  = (-.110,0)
-    self.leftHeight       = .001
+    # FIXME this has to be corrected as soon as the sensors are moved.
+    # this is the rotation around z, clockwise in degree
+    self.frontRotation      = 0
+    # (x,y,z), x points to the front of the robot, y to the left, z is measured from the robot base
+    self.frontTranslation   = (.220,0)
+    self.frontHeight        = 0
+    self.rightRotation      = 90
+    self.rightTranslation   = (0,-.110)
+    self.rightHeight        = 0
+    self.backRotation       = 180
+    self.backTranslation    = (0.22,0)
+    self.backHeight         = 0
+    self.leftRotation       = 270
+    self.leftTranslation    = (0,.110)
+    self.leftHeight         = 0
+    self.kinectRotation     = 0
+    self.kinectTranslation  = (.195,0,.145)
     
     # timestamps
     self.frontTimestamp  = rospy.Time()
@@ -55,16 +60,16 @@ class PointCloudCreator:
     
     # values for ICP stuff
     self.resetICPCheckValues() # this sets the ready values
-    self.ICPReady         = True
-    self.laserICPyamlPath = '/tmp/laserICP.yaml'
-    self.frontCloudPath   = '/tmp/frontCloud.csv'
-    self.rightCloudPath   = '/tmp/rightCloud.csv'
-    self.leftCloudPath    = '/tmp/leftCloud.csv'
-    self.kinectCloudPath  = '/tmp/kinectCloud.csv'
-    self.icpResultDir     = '/tmp/'
-    self.icpResultPath    = '/tmp/test_data_out.vtk'
-    self.devnull          = open(devnull, 'w')
+    self.ICPReady          = True
+    self.laserICPyamlPath  = '/tmp/laserICP.yaml'
     self.kinectICPyamlPath = '/tmp/kinectICP.yaml'
+    self.frontCloudPath    = '/tmp/frontCloud.csv'
+    self.rightCloudPath    = '/tmp/rightCloud.csv'
+    self.leftCloudPath     = '/tmp/leftCloud.csv'
+    self.kinectCloudPath   = '/tmp/kinectCloud.csv'
+    self.icpResultDir      = '/tmp/'
+    self.icpResultPath     = '/tmp/test_data_out.vtk'
+    self.devnull           = open(devnull, 'w')
     
     # publisher
     self.cloudPublisher = cloudPublisher
@@ -130,7 +135,12 @@ class PointCloudCreator:
     points = pc2.read_points(depthImage, skip_nans=True, field_names=("x", "y", "z"))
     while True: # Stop this loop, when writing rows no longer possible
       try:
-        outtext.append(next(points))
+        # points is a generator, take one point and process it
+        point = points.next()
+        # the PoinCloud 2 of the camera is strangely rotated, make it correct
+        outtext.append( (point[2]  + self.kinectTranslation[0],
+                        -point[0] + self.kinectTranslation[1],
+                        -point[1] + self.kinectTranslation[2]) )
       except StopIteration:
         break
     self.writePointCloudToFile(self.kinectCloudPath, outtext)
@@ -352,13 +362,19 @@ class PointCloudCreator:
         # decide whether the measurement is in the left or right half or forward
         if index == self.halfMeasure:
           # direction is directly forward
-          xCoord = 0
-          yCoord = laserData.ranges[index]
+          xCoord = laserData.ranges[index]
+          yCoord = 0
         else:
-          angle = index * laserData.angle_increment
-          # calculate relative coordinates
-          xCoord = cos(angle) * laserData.ranges[index]
-          yCoord = sin(angle) * laserData.ranges[index]
+          if index <= self.halfMeasure:
+            # right half of the scan
+            angle = index * laserData.angle_increment
+            xCoord = sin(angle) * laserData.ranges[index]
+            yCoord = - cos(angle) * laserData.ranges[index]
+          else:
+            # left half of the scan
+            angle = (index - self.halfMeasure) * laserData.angle_increment
+            xCoord = cos(angle) * laserData.ranges[index]
+            yCoord = sin(angle) * laserData.ranges[index]   
         # put into output array
         cloudPoints.append( [xCoord,yCoord,zCoord] )
     return cloudPoints
@@ -422,8 +438,6 @@ class PointCloudCreator:
     f.write("      knn: 10\n")
     #f.write("  - RandomSamplingDataPointsFilter:\n")
     #f.write("      prob: 0.5\n")
-    f.write("\n")
-    
     f.write("\n")
     f.write("matcher:\n")
     f.write("  KDTreeMatcher:\n")

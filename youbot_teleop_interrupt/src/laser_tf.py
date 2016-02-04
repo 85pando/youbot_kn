@@ -41,7 +41,7 @@ if __name__ == '__main__':
   rate = rospy.Rate(10.0)
   
   # variables for locations of the sensors
-  sensorC = Displacement(zrot=-pi/2)
+  sensorC = Displacement()
   # FIXME correct values when sensors are correctly attached
   frontL  = Displacement(x=.22)
   # FIXME correct values when sensors are correctly attached
