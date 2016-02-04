@@ -223,13 +223,12 @@ class PointCloudCreator:
     laserCloud = frontRightCloud + leftCloud
     del leftCloud
     
-    # execute ICP laserCloud <-> kinectCloud, FIXME uncomment this, when kinect present
+    # execute ICP laserCloud <-> kinectCloud
     subprocess.call(['pmicp', '--config', self.kinectICPyamlPath,
-                     #self.kinectCloudPath, self.rightCloudPath],
                      self.frontCloudPath, self.kinectCloudPath],
-                     #stdout=self.devnull,stderr=self.devnull,
+                     stdout=self.devnull,stderr=self.devnull,
                      )
-    # extract new kinectCloud from vtk-file,  use comment as soon as kinect present
+    # extract new kinectCloud from vtk-file
     kinectCloud = extractPoints(self.icpResultPath)
     
     # combine finalCloud = laserCloud + kinectCloud
@@ -428,10 +427,10 @@ class PointCloudCreator:
     """
     f = open(self.kinectICPyamlPath, 'w')
     f.write("readingDataPointsFilters:\n")
-    #f.write("  - SurfaceNormalDataPointsFilter:\n")
-    #f.write("      knn: 10\n")
-    f.write("  - RandomSamplingDataPointsFilter:\n")
-    f.write("      prob: 0.5\n")
+    f.write("  - SurfaceNormalDataPointsFilter:\n")
+    f.write("      knn: 10\n")
+    #f.write("  - RandomSamplingDataPointsFilter:\n")
+    #f.write("      prob: 0.5\n")
     f.write("\n")
     f.write("referenceDataPointsFilters:\n")
     f.write("  - SurfaceNormalDataPointsFilter:\n")
@@ -445,10 +444,10 @@ class PointCloudCreator:
     f.write("    epsilon: 0\n")
     f.write("    maxDist: 0.25\n")
     f.write("\n")
-    #f.write("outlierFilters:\n")
-    #f.write("  - TrimmedDistOutlierFilter:\n")
-    #f.write("      ratio: 0.85\n")
-    #f.write("\n")
+    f.write("outlierFilters:\n")
+    f.write("  - TrimmedDistOutlierFilter:\n")
+    f.write("      ratio: 0.85\n")
+    f.write("\n")
     f.write("errorMinimizer:\n")
     f.write("  PointToPointErrorMinimizer\n")
     f.write("\n")
