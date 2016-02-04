@@ -93,8 +93,7 @@ class PointCloudCreator:
     del frontCloud
     self.writePointCloudToFile(self.frontCloudPath, self.frontCloud)
     # frontCloud can now be processed
-    self.frontTimestamp.secs  = frontLaser.header.stamp.secs
-    self.frontTimestamp.nsecs = frontLaser.header.stamp.nsecs
+    self.frontTimestamp = frontLaser.header.stamp
     self.frontReady = True
     self.executeIcp()
     return None
@@ -113,8 +112,7 @@ class PointCloudCreator:
     del rightCloud
     self.writePointCloudToFile(self.rightCloudPath, self.rightCloud)
     # don't need to save rightCloud, this will come from the ICP result
-    self.rightTimestamp.secs  = rightLaser.header.stamp.secs
-    self.rightTimestamp.nsecs = rightLaser.header.stamp.nsecs
+    self.rightTimestamp = rightLaser.header.stamp
     self.rightReady = True
     self.executeIcp
     return None
@@ -126,11 +124,10 @@ class PointCloudCreator:
     :param depthImage: A pointCloud2 as specified by the ROS framework http://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html
     """
     if not self.ICPReady:
-      #rospy.loginfo("depthImage dropped")
+      rospy.loginfo("depthImage dropped")
       print("depthImage dropped")
       return None
     self.ICPReady = False
-    # write header
     outtext = []
     points = pc2.read_points(depthImage, skip_nans=True, field_names=("x", "y", "z"))
     while True: # Stop this loop, when writing rows no longer possible
@@ -144,6 +141,7 @@ class PointCloudCreator:
       except StopIteration:
         break
     self.writePointCloudToFile(self.kinectCloudPath, outtext)
+    self.kinectTimestamp = depthImage.header.stamp
     self.kinectReady = True
     self.executeIcp()
     return None
@@ -169,21 +167,22 @@ class PointCloudCreator:
       return None
     # all clouds are ready, reset check values
     self.resetICPCheckValues()
-    #decide what the timestamp should be #FIXME probably take the kinect timestamp here, as this is probably the one with the lowest frequency
+    #decide what the timestamp should be
     timestamp = rospy.Time()
-    if (self.frontTimestamp.secs == self.rightTimestamp.secs):
-      # when all timestamps are in the same second, check the nanoseconds
-      # TODO when more sensors, check if there is one oldest
-      if (self.frontTimestamp.nsecs < self.rightTimestamp.nsecs):
-        timestamp = self.frontTimestamp
-      else:
-        timestamp = self.rightTimestamp
-    else:
-      # if not all timestamps in the same second, take the oldest
-      if (self.frontTimestamp.secs < self.rightTimestamp.secs):
-        timestamp = self.frontTimestamp
-      else:
-        timestamp = self.rightTimestamp
+    timestamp.secs = min([self.frontTimestamp.secs, self.rightTimestamp.secs, self.kinectTimestamp.secs])
+    # FIXME uncomment, when left laser is present
+    #timestamp.secs = min([self.frontTimestamp.secs, self.rightTimestamp.secs, self.rightTimestamp, self.kinectTimestamp.secs])
+    nsecsList = []
+    if (timestamp.secs == self.frontTimestamp.secs):
+      nsecsList.append(self.frontTimestamp.nsecs)
+    if (timestamp.secs == self.rightTimestamp.secs):
+      nsecsList.append(self.rightTimestamp.nsecs)
+    # FIXME uncomment when left laser is present
+    #if (timestamp.secs == self.leftTimestamp.secs):
+    #  nsecsList.append(self.leftTimestamp.nsecs)
+    if (timestamp.secs == self.kinectTimestamp.secs):
+      nsecsList.append(self.kinectTimestamp.nsecs)
+    timestamp.nsecs = min(nsecsList)
     
     # create config file for ICP if it does not exist
     if not path.isfile(self.laserICPyamlPath):
@@ -206,6 +205,9 @@ class PointCloudCreator:
 
     # extract new rightCloud from vtk-file
     rightCloud = extractPoints(self.icpResultPath)
+    
+    # FIXME remove this output
+    #self.writePointCloudToFile("/tmp/rightCloudICP.csv", rightCloud)
     
     # execute ICP front <-> left, FIXME uncomment this, when second laser present
     #subprocess.call(['pmicp', '--config', self.laserICPyamlPath,
@@ -236,6 +238,7 @@ class PointCloudCreator:
     del laserCloud
     del kinectCloud
     
+    # FIXME remove this output
     #self.writePointCloudToFile("/tmp/icpResult.csv", finalCloud)
     
     self.publishPointCloud(finalCloud, timestamp)
@@ -429,14 +432,10 @@ class PointCloudCreator:
     f.write("readingDataPointsFilters:\n")
     f.write("  - SurfaceNormalDataPointsFilter:\n")
     f.write("      knn: 10\n")
-    #f.write("  - RandomSamplingDataPointsFilter:\n")
-    #f.write("      prob: 0.5\n")
     f.write("\n")
     f.write("referenceDataPointsFilters:\n")
     f.write("  - SurfaceNormalDataPointsFilter:\n")
     f.write("      knn: 10\n")
-    #f.write("  - RandomSamplingDataPointsFilter:\n")
-    #f.write("      prob: 0.5\n")
     f.write("\n")
     f.write("matcher:\n")
     f.write("  KDTreeMatcher:\n")
